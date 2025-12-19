@@ -1,16 +1,29 @@
-# WebGL Fluid Simulation
+# Fluid Jedi Simulation
 
-[Play here](https://paveldogreat.github.io/WebGL-Fluid-Simulation/)
+A WebGL fluid simulation controlled by hand tracking - Use the Force!
 
-<img src="/screenshot.jpg?raw=true" width="880">
+**🎮 Live Demo: https://liviaellen.github.io/Fluid-Jedi-Simulation/**
 
-## References
+## Features
 
-https://developer.nvidia.com/gpugems/gpugems/part-vi-beyond-triangles/chapter-38-fast-fluid-dynamics-simulation-gpu
+- **Hand Tracking Control**: Use your hands to control the fluid like a Jedi
+- **MediaPipe Integration**: Real-time hand detection and tracking
+- **Both Hands Support**: Independent control with each hand
+- **WebGL Fluid Physics**: GPU-accelerated fluid simulation
+- **Pixelated Retro Style**: Classic retro aesthetic
 
-https://github.com/mharrys/fluids-2d
+## How to Use
 
-https://github.com/haxiomic/GPU-Fluid-Experiments
+1. Open the live demo
+2. Grant camera permissions
+3. Wave your hands and point with your index fingers
+4. Create amazing fluid art with hand gestures!
+
+## Credits
+
+**By Livia Ellen** ([@ellen_in_sf](https://twitter.com/ellen_in_sf))
+
+Based on WebGL Fluid Simulation by Pavel Dobryakov
 
 ## License
 

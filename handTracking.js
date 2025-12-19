@@ -198,15 +198,10 @@ class HandTrackingManager {
         // Mark pointer as down (hand is detected)
         if (!pointer.down) {
             pointer.down = true;
-            // Generate a random color for this hand if it doesn't have one
-            if (typeof generateColor === 'function') {
-                pointer.color = generateColor();
-            } else {
-                // Fallback: use different colors for each hand
-                pointer.color = handIndex === 0
-                    ? [0.2, 0.5, 0.8]  // Blue for left hand
-                    : [0.8, 0.3, 0.2]; // Red for right hand
-            }
+            // Use red and blue colors for pixelated aesthetic
+            pointer.color = handIndex === 0
+                ? [0, 0.5, 1.0]     // Bright blue for left hand
+                : [1.0, 0, 0.25];   // Bright red for right hand
         }
 
         // Store current position for next frame's delta calculation
