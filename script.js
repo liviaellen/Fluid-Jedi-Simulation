@@ -298,13 +298,28 @@ function startGUI () {
     // Set initial button states
     updateButtonStates();
 
-    // Change close button text
+    // Change close button text and add custom hide behavior
     setTimeout(() => {
         const closeButton = gui.domElement.querySelector('.close-button');
         if (closeButton) {
             closeButton.textContent = 'Hide Panel';
+
+            // Override the default click behavior to fully hide the panel
+            closeButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                gui.domElement.style.display = 'none';
+            });
         }
     }, 0);
+
+    // Add keyboard shortcut to show panel again (H key)
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'h' || e.key === 'H') {
+            if (gui.domElement.style.display === 'none') {
+                gui.domElement.style.display = 'block';
+            }
+        }
+    });
 
     gui.add({ fun: () => {
         splatStack.push(parseInt(Math.random() * 20) + 5);

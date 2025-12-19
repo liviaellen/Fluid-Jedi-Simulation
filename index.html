@@ -67,20 +67,24 @@
             .title-main {
                 font-family: 'Press Start 2P', cursive;
                 font-size: 32px;
-                color: #0080ff;
+                color: #ff1493;
                 text-shadow:
-                    4px 4px 0px #0050aa,
+                    4px 4px 0px #990055,
                     8px 8px 0px #000,
-                    0 0 20px rgba(255, 255, 255, 0.8),
-                    0 0 40px rgba(200, 200, 200, 0.6),
-                    0 0 60px rgba(150, 150, 150, 0.4);
+                    0 0 20px rgba(255, 20, 147, 0.8),
+                    0 0 40px rgba(255, 105, 180, 0.6),
+                    0 0 60px rgba(255, 182, 193, 0.4);
                 letter-spacing: 2px;
                 margin: 0;
-                padding: 0;
+                padding: 15px 25px;
                 line-height: 1.5;
                 image-rendering: pixelated;
                 image-rendering: -moz-crisp-edges;
                 image-rendering: crisp-edges;
+                background: rgba(0, 0, 0, 0.85);
+                border: 2px solid #0080ff;
+                border-radius: 8px;
+                box-shadow: 0 0 20px rgba(0, 128, 255, 0.3);
             }
 
             .instruction-text {
@@ -485,6 +489,44 @@
                     height: 18px;
                 }
             }
+
+            .show-panel-button {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+                background: rgba(0, 40, 80, 0.9);
+                border: 2px solid #0080ff;
+                border-radius: 4px;
+                padding: 12px 20px;
+                font-family: 'Press Start 2P', cursive;
+                font-size: 10px;
+                color: #0080ff;
+                text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
+                cursor: pointer;
+                box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
+                transition: all 0.3s ease;
+            }
+
+            .show-panel-button:hover {
+                background: rgba(0, 80, 160, 0.9);
+                box-shadow: 0 0 20px rgba(0, 128, 255, 0.6);
+                transform: scale(1.05);
+            }
+
+            .show-panel-button:active {
+                background: rgba(0, 120, 255, 0.9);
+                box-shadow: 0 0 25px rgba(0, 128, 255, 0.8);
+            }
+
+            @media (max-width: 768px) {
+                .show-panel-button {
+                    top: 10px;
+                    right: 10px;
+                    padding: 8px 12px;
+                    font-size: 7px;
+                }
+            }
         </style>
         <script>
             window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -535,6 +577,8 @@
                 <source src="ambient-music.mp3" type="audio/mpeg">
             </audio>
         </div>
+
+        <button id="show-panel-btn" class="show-panel-button" style="display: none;">SHOW PANEL</button>
 
         <script>
             // Set default volume to 70%
