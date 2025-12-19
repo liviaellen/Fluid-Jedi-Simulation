@@ -224,13 +224,91 @@ function supportRenderTextureFormat (gl, internalFormat, format, type) {
 function startGUI () {
     var gui = new dat.GUI({ width: 320 });
 
-    // Main Controls
-    gui.add(config, 'PAUSED').name('⏸ Paused').listen();
-    gui.add(config, 'COLORFUL').name('🌈 Colorful');
+    // Main Controls - Dual Buttons
+
+    // Pause Control - MOVE and FREEZE buttons
+    let moveButton = gui.add({ fun: () => {
+        config.PAUSED = false;
+        updateButtonStates();
+    } }, 'fun').name('MOVE');
+    moveButton.__li.classList.add('dual-button', 'dual-left');
+
+    let freezeButton = gui.add({ fun: () => {
+        config.PAUSED = true;
+        updateButtonStates();
+    } }, 'fun').name('FREEZE');
+    freezeButton.__li.classList.add('dual-button', 'dual-right');
+
+    // Color Control - MIX and SINGLE buttons
+    let mixButton = gui.add({ fun: () => {
+        config.COLORFUL = true;
+        updateButtonStates();
+    } }, 'fun').name('MIX COLOR');
+    mixButton.__li.classList.add('dual-button', 'dual-left');
+
+    let singleButton = gui.add({ fun: () => {
+        config.COLORFUL = false;
+        updateButtonStates();
+    } }, 'fun').name('SINGLE');
+    singleButton.__li.classList.add('dual-button', 'dual-right');
+
+    // Size Control - SMALL and BIG buttons
+    let smallButton = gui.add({ fun: () => {
+        config.SPLAT_RADIUS = 0.01;
+        updateButtonStates();
+    } }, 'fun').name('SMALL');
+    smallButton.__li.classList.add('dual-button', 'dual-left');
+
+    let bigButton = gui.add({ fun: () => {
+        config.SPLAT_RADIUS = 0.19;
+        updateButtonStates();
+    } }, 'fun').name('BIG');
+    bigButton.__li.classList.add('dual-button', 'dual-right');
+
+    // Function to update button states
+    function updateButtonStates() {
+        // Update pause buttons
+        if (config.PAUSED) {
+            freezeButton.__li.classList.add('active');
+            moveButton.__li.classList.remove('active');
+        } else {
+            moveButton.__li.classList.add('active');
+            freezeButton.__li.classList.remove('active');
+        }
+
+        // Update color buttons
+        if (config.COLORFUL) {
+            mixButton.__li.classList.add('active');
+            singleButton.__li.classList.remove('active');
+        } else {
+            singleButton.__li.classList.add('active');
+            mixButton.__li.classList.remove('active');
+        }
+
+        // Update size buttons
+        if (config.SPLAT_RADIUS <= 0.01) {
+            smallButton.__li.classList.add('active');
+            bigButton.__li.classList.remove('active');
+        } else {
+            bigButton.__li.classList.add('active');
+            smallButton.__li.classList.remove('active');
+        }
+    }
+
+    // Set initial button states
+    updateButtonStates();
+
+    // Change close button text
+    setTimeout(() => {
+        const closeButton = gui.domElement.querySelector('.close-button');
+        if (closeButton) {
+            closeButton.textContent = 'Hide Panel';
+        }
+    }, 0);
+
     gui.add({ fun: () => {
         splatStack.push(parseInt(Math.random() * 20) + 5);
     } }, 'fun').name('✨ Random Splats');
-    gui.add(config, 'SPLAT_RADIUS', 0.01, 1.0).name('Splat Radius');
 
     // Visual Effects
     let bloomFolder = gui.addFolder('Bloom Effects');
@@ -265,12 +343,19 @@ function startGUI () {
     let github = gui.add({ fun : () => {
         window.open('https://github.com/liviaellen/Fluid-Jedi-Simulation');
         ga('send', 'event', 'link button', 'github');
-    } }, 'fun').name('Github');
+    } }, 'fun').name('open source');
     github.__li.className = 'cr function bigFont';
     github.__li.style.borderLeft = '3px solid #00ff00';
     let githubIcon = document.createElement('span');
     github.domElement.parentElement.appendChild(githubIcon);
     githubIcon.className = 'icon github';
+
+    let instagram = gui.add({ fun : () => {
+        ga('send', 'event', 'link button', 'instagram');
+        window.open('https://instagram.com/ellen_in_sf');
+    } }, 'fun').name('Instagram');
+    instagram.__li.className = 'cr function bigFont';
+    instagram.__li.style.borderLeft = '3px solid #00ff00';
 
     let twitter = gui.add({ fun : () => {
         ga('send', 'event', 'link button', 'twitter');
