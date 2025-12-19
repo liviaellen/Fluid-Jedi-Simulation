@@ -13,6 +13,9 @@
         <link rel="icon" href="logo.png">
 
         <title>Fluid Jedi Simulation by Livia Ellen</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
         <meta name="description" content="A WebGL fluid simulation controlled by hand tracking - by Livia Ellen (@ellen_in_sf)">
 
         <meta property="og:type" content="website">
@@ -59,59 +62,73 @@
                 text-align: center;
                 z-index: 100;
                 pointer-events: none;
-                font-family: 'Courier New', monospace;
+            }
+
+            .title-main {
+                font-family: 'Press Start 2P', cursive;
+                font-size: 32px;
+                color: #ff0040;
+                text-shadow:
+                    4px 4px 0px #0080ff,
+                    8px 8px 0px #000;
+                letter-spacing: 2px;
+                margin: 0;
+                padding: 0;
+                line-height: 1.5;
                 image-rendering: pixelated;
                 image-rendering: -moz-crisp-edges;
                 image-rendering: crisp-edges;
             }
 
-            .title-main {
-                font-size: 48px;
-                font-weight: bold;
-                color: #ff0040;
-                text-shadow:
-                    3px 3px 0px #0080ff,
-                    6px 6px 0px #000;
-                letter-spacing: 6px;
+            .credits-box {
+                position: fixed;
+                bottom: 15px;
+                left: 15px;
+                z-index: 100;
+                pointer-events: none;
+                background: rgba(0, 0, 0, 0.85);
+                border: 2px solid #00ff00;
+                padding: 12px 16px;
+                font-family: 'Press Start 2P', cursive;
+                background-image:
+                    linear-gradient(0deg, transparent 24%, rgba(0, 255, 0, 0.05) 25%, rgba(0, 255, 0, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, 0.05) 75%, rgba(0, 255, 0, 0.05) 76%, transparent 77%, transparent),
+                    linear-gradient(90deg, transparent 24%, rgba(0, 255, 0, 0.05) 25%, rgba(0, 255, 0, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 0, 0.05) 75%, rgba(0, 255, 0, 0.05) 76%, transparent 77%, transparent);
+                background-size: 8px 8px;
+            }
+
+            .credits-name {
+                font-size: 10px;
+                color: #00ff00;
                 margin: 0;
                 padding: 0;
-                line-height: 1.2;
-                filter: contrast(1.2);
+                line-height: 1.6;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
             }
 
-            .title-subtitle {
-                font-size: 20px;
-                color: #00ccff;
-                text-shadow:
-                    2px 2px 0px #ff0040,
-                    4px 4px 0px #000;
-                letter-spacing: 3px;
-                margin: 5px 0 0 0;
+            .credits-handle {
+                font-size: 8px;
+                color: #00cc00;
+                margin: 4px 0 0 0;
                 padding: 0;
-                filter: contrast(1.2);
-            }
-
-            .title-handle {
-                font-size: 16px;
-                color: #ff0080;
-                text-shadow:
-                    2px 2px 0px #000;
-                letter-spacing: 2px;
-                margin: 2px 0 0 0;
-                padding: 0;
-                filter: contrast(1.2);
+                line-height: 1.6;
+                text-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
             }
 
             @media (max-width: 768px) {
                 .title-main {
-                    font-size: 28px;
-                    letter-spacing: 2px;
+                    font-size: 16px;
+                    letter-spacing: 1px;
                 }
-                .title-subtitle {
-                    font-size: 14px;
+                .credits-box {
+                    bottom: 10px;
+                    left: 10px;
+                    padding: 8px 12px;
                 }
-                .title-handle {
-                    font-size: 12px;
+                .credits-name {
+                    font-size: 8px;
+                }
+                .credits-handle {
+                    font-size: 6px;
                 }
             }
 
@@ -265,9 +282,12 @@
         <canvas></canvas>
 
         <div class="title-overlay">
-            <h1 class="title-main">FLUID JEDI SIMULATION</h1>
-            <p class="title-subtitle">by Livia Ellen</p>
-            <p class="title-handle">@ellen_in_sf</p>
+            <h1 class="title-main">FLUID JEDI<br>SIMULATION</h1>
+        </div>
+
+        <div class="credits-box">
+            <p class="credits-name">by Livia Ellen</p>
+            <p class="credits-handle">@ellen_in_sf</p>
         </div>
 
         <!-- Mother of God, pls forgive me -->
