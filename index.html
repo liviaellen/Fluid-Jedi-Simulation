@@ -149,7 +149,8 @@
                 }
                 .credits-box {
                     bottom: 10px;
-                    left: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
                     padding: 8px 12px;
                 }
                 .credits-name {
@@ -157,6 +158,16 @@
                 }
                 .credits-handle {
                     font-size: 6px;
+                }
+
+                /* Hide control panel on mobile */
+                .dg.main {
+                    display: none !important;
+                }
+
+                /* Hide show panel button on mobile */
+                .show-panel-button {
+                    display: none !important;
                 }
             }
 
