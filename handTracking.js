@@ -149,6 +149,9 @@ class HandTrackingManager {
         // Without this, moving hand right would move cursor left
         rawX = 1.0 - rawX;
 
+        // Flip y-axis for correct vertical direction
+        rawY = 1.0 - rawY;
+
         // Apply smoothing to reduce jitter
         if (this.smoothedPositions[handIndex] === null) {
             // First detection - initialize smoothed position
