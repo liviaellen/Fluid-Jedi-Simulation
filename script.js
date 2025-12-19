@@ -336,9 +336,10 @@ function startGUI () {
         }
     });
 
-    gui.add({ fun: () => {
+    let bigBangButton = gui.add({ fun: () => {
         splatStack.push(parseInt(Math.random() * 20) + 5);
-    } }, 'fun').name('SPARKS');
+    } }, 'fun').name('Big Bang');
+    bigBangButton.__li.classList.add('big-bang-button');
 
     // Visual Effects
     let bloomFolder = gui.addFolder('Bloom Effects');

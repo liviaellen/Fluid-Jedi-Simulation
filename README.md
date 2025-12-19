@@ -14,9 +14,9 @@ A stunning WebGL fluid simulation controlled by hand tracking with ambient music
 - **Ambient Music Player**: Atmospheric background music with volume controls
 - **Interactive Controls**:
   - MOVE/FREEZE - Pause and play the simulation
-  - MIX/SINGLE - Toggle between colorful and single color modes
+  - MIX COLOR/SINGLE - Toggle between colorful and single color modes
   - SMALL/BIG - Adjust splat size
-  - SPARKS - Generate random fluid splats
+  - Big Bang - Generate random fluid splats
 
 ## How to Use
 
@@ -41,6 +41,8 @@ A stunning WebGL fluid simulation controlled by hand tracking with ambient music
 ## Credits
 
 **Created by Livia Ellen** ([@ellen_in_sf](https://twitter.com/ellen_in_sf))
+
+WebGL fluid simulation based on [Pavel Dobryakov's Fluid Simulation](https://github.com/PavelDoGreat/WebGL-Fluid-Simulation)
 
 ## License
 
