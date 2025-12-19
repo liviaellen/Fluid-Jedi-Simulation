@@ -1643,3 +1643,11 @@ function hashCode (s) {
     }
     return hash;
 };
+
+// Keyboard controls
+window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+        e.preventDefault();
+        config.PAUSED = !config.PAUSED;
+    }
+});
