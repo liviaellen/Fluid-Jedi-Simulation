@@ -343,9 +343,9 @@ function startGUI () {
     let github = gui.add({ fun : () => {
         window.open('https://github.com/liviaellen/Fluid-Jedi-Simulation');
         ga('send', 'event', 'link button', 'github');
-    } }, 'fun').name('open source');
+    } }, 'fun').name('Open Source Code');
     github.__li.className = 'cr function bigFont';
-    github.__li.style.borderLeft = '3px solid #00ff00';
+    github.__li.style.borderLeft = '3px solid #0080ff';
     let githubIcon = document.createElement('span');
     github.domElement.parentElement.appendChild(githubIcon);
     githubIcon.className = 'icon github';
@@ -355,14 +355,14 @@ function startGUI () {
         window.open('https://instagram.com/ellen_in_sf');
     } }, 'fun').name('Instagram');
     instagram.__li.className = 'cr function bigFont';
-    instagram.__li.style.borderLeft = '3px solid #00ff00';
+    instagram.__li.style.borderLeft = '3px solid #0080ff';
 
     let twitter = gui.add({ fun : () => {
         ga('send', 'event', 'link button', 'twitter');
         window.open('https://twitter.com/ellen_in_sf');
     } }, 'fun').name('Twitter');
     twitter.__li.className = 'cr function bigFont';
-    twitter.__li.style.borderLeft = '3px solid #00ff00';
+    twitter.__li.style.borderLeft = '3px solid #0080ff';
     let twitterIcon = document.createElement('span');
     twitter.domElement.parentElement.appendChild(twitterIcon);
     twitterIcon.className = 'icon twitter';
