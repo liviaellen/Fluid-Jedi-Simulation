@@ -341,6 +341,9 @@ function startGUI () {
     } }, 'fun').name('Big Bang');
     bigBangButton.__li.classList.add('big-bang-button');
 
+    // Splat Controls
+    gui.add(config, 'SPLAT_RADIUS', 0.01, 1.0).name('splat radius');
+
     // Visual Effects
     let bloomFolder = gui.addFolder('Bloom Effects');
     bloomFolder.add(config, 'BLOOM').name('enabled').onFinishChange(updateKeywords);
