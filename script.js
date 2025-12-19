@@ -308,7 +308,7 @@ function startGUI () {
 
     gui.add({ fun: () => {
         splatStack.push(parseInt(Math.random() * 20) + 5);
-    } }, 'fun').name('✨ Random Splats');
+    } }, 'fun').name('SPARKS');
 
     // Visual Effects
     let bloomFolder = gui.addFolder('Bloom Effects');
