@@ -24,7 +24,7 @@ SOFTWARE.
 
 'use strict';
 
-// Mobile promo section
+// Mobile desktop notification
 
 const promoPopup = document.getElementsByClassName('promo')[0];
 const promoPopupClose = document.getElementsByClassName('promo-close')[0];
@@ -32,23 +32,11 @@ const promoPopupClose = document.getElementsByClassName('promo-close')[0];
 if (isMobile()) {
     setTimeout(() => {
         promoPopup.style.display = 'table';
-    }, 20000);
+    }, 2000); // Show after 2 seconds on mobile
 }
 
 promoPopupClose.addEventListener('click', e => {
     promoPopup.style.display = 'none';
-});
-
-const appleLink = document.getElementById('apple_link');
-appleLink.addEventListener('click', e => {
-    ga('send', 'event', 'link promo', 'app');
-    window.open('https://apps.apple.com/us/app/fluid-simulation/id1443124993');
-});
-
-const googleLink = document.getElementById('google_link');
-googleLink.addEventListener('click', e => {
-    ga('send', 'event', 'link promo', 'app');
-    window.open('https://play.google.com/store/apps/details?id=games.paveldogreat.fluidsimfree');
 });
 
 // Simulation section
@@ -298,16 +286,41 @@ function startGUI () {
     // Set initial button states
     updateButtonStates();
 
-    // Change close button text and add custom hide behavior
+    // Remove the default close button and add ribbon
     setTimeout(() => {
         const closeButton = gui.domElement.querySelector('.close-button');
         if (closeButton) {
-            closeButton.textContent = 'Hide Panel';
+            closeButton.style.display = 'none';
+        }
 
-            // Override the default click behavior to fully hide the panel
-            closeButton.addEventListener('click', (e) => {
-                e.stopPropagation();
-                gui.domElement.style.display = 'none';
+        // Create and add hide panel ribbon at the bottom
+        const ribbon = document.createElement('div');
+        ribbon.className = 'hide-panel-ribbon';
+        ribbon.textContent = 'HIDE PANEL';
+
+        // Make the GUI panel position relative so ribbon can be absolute
+        gui.domElement.style.position = 'relative';
+        gui.domElement.style.paddingBottom = '50px'; // Make space for ribbon
+
+        gui.domElement.appendChild(ribbon);
+
+        // Ribbon click handler
+        ribbon.addEventListener('click', () => {
+            const showPanelBtn = document.getElementById('show-panel-btn');
+            gui.domElement.classList.add('panel-hidden');
+            if (showPanelBtn) {
+                setTimeout(() => {
+                    showPanelBtn.style.display = 'block';
+                }, 300); // Wait for slide animation to complete
+            }
+        });
+
+        // Show panel button click handler
+        const showPanelBtn = document.getElementById('show-panel-btn');
+        if (showPanelBtn) {
+            showPanelBtn.addEventListener('click', () => {
+                showPanelBtn.style.display = 'none';
+                gui.domElement.classList.remove('panel-hidden');
             });
         }
     }, 0);
@@ -315,8 +328,10 @@ function startGUI () {
     // Add keyboard shortcut to show panel again (H key)
     window.addEventListener('keydown', (e) => {
         if (e.key === 'h' || e.key === 'H') {
-            if (gui.domElement.style.display === 'none') {
-                gui.domElement.style.display = 'block';
+            const showPanelBtn = document.getElementById('show-panel-btn');
+            if (gui.domElement.classList.contains('panel-hidden')) {
+                showPanelBtn.style.display = 'none';
+                gui.domElement.classList.remove('panel-hidden');
             }
         }
     });
@@ -358,7 +373,7 @@ function startGUI () {
     let github = gui.add({ fun : () => {
         window.open('https://github.com/liviaellen/Fluid-Jedi-Simulation');
         ga('send', 'event', 'link button', 'github');
-    } }, 'fun').name('Source Code');
+    } }, 'fun').name('Open Source Code');
     github.__li.className = 'cr function bigFont';
     github.__li.style.borderLeft = '3px solid #0080ff';
     let githubIcon = document.createElement('span');

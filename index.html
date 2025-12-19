@@ -177,6 +177,11 @@
                 background: rgba(0, 0, 0, 0.9);
                 border: 2px solid #0080ff;
                 box-shadow: 0 0 20px rgba(0, 128, 255, 0.3);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .dg.main.panel-hidden {
+                transform: translateX(100%);
             }
 
             .dg.main .close-button {
@@ -227,6 +232,7 @@
                 pointer-events: auto !important;
                 position: relative;
                 z-index: 10;
+                font-size: 9px !important;
             }
 
             .dg .cr.function.dual-button {
@@ -527,6 +533,38 @@
                     font-size: 7px;
                 }
             }
+
+            .hide-panel-ribbon {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(180deg, rgba(0, 40, 80, 0.8) 0%, rgba(0, 80, 160, 0.95) 100%);
+                border-top: 2px solid #0080ff;
+                border-bottom: 2px solid #0080ff;
+                padding: 12px;
+                text-align: center;
+                font-family: 'Press Start 2P', cursive;
+                font-size: 10px;
+                color: #0080ff;
+                text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
+                cursor: pointer;
+                box-shadow: 0 -4px 15px rgba(0, 128, 255, 0.3), inset 0 2px 10px rgba(0, 128, 255, 0.2);
+                transition: all 0.2s ease;
+                z-index: 1000;
+                letter-spacing: 2px;
+            }
+
+            .hide-panel-ribbon:hover {
+                background: linear-gradient(180deg, rgba(0, 60, 120, 0.9) 0%, rgba(0, 100, 200, 1) 100%);
+                text-shadow: 0 0 12px rgba(0, 128, 255, 1);
+                box-shadow: 0 -6px 20px rgba(0, 128, 255, 0.5), inset 0 2px 15px rgba(0, 128, 255, 0.4);
+            }
+
+            .hide-panel-ribbon:active {
+                background: linear-gradient(180deg, rgba(0, 80, 160, 1) 0%, rgba(0, 120, 255, 1) 100%);
+                transform: scale(0.98);
+            }
         </style>
         <script>
             window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
@@ -549,7 +587,6 @@
             <p class="credits-handle">@ellen_in_sf</p>
         </div>
 
-        <!-- Mother of God, pls forgive me -->
         <div class="promo">
             <div class="promo-middle">
                 <div class="promo-content">
@@ -557,15 +594,7 @@
                         <span class="promo-close">&times;</span>
                     </div>
                     <div class="promo-body">
-                        <p>Try Fluid Simulation app!</p>
-                        <div class="links-container">
-                            <a class="link" id="apple_link" target="_blank">
-                                <img class="link-img" alt="Download on the App Store" src="app_badge.png"/>
-                            </a>
-                            <a class="link" id="google_link" target="_blank">
-                                <img class="link-img" alt="Get it on Google Play" src="gp_badge.png"/>
-                            </a>
-                        </div>
+                        <p style="font-size: 1.2em; line-height: 1.6; padding: 20px;">Please open Aurora Flow in a desktop browser or PC for the full hand tracking experience! 💻</p>
                     </div>
                 </div>
             </div>
