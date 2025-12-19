@@ -67,10 +67,13 @@
             .title-main {
                 font-family: 'Press Start 2P', cursive;
                 font-size: 32px;
-                color: #ff0040;
+                color: #0080ff;
                 text-shadow:
-                    4px 4px 0px #0080ff,
-                    8px 8px 0px #000;
+                    4px 4px 0px #0050aa,
+                    8px 8px 0px #000,
+                    0 0 20px rgba(255, 255, 255, 0.8),
+                    0 0 40px rgba(200, 200, 200, 0.6),
+                    0 0 60px rgba(150, 150, 150, 0.4);
                 letter-spacing: 2px;
                 margin: 0;
                 padding: 0;
@@ -83,14 +86,21 @@
             .instruction-text {
                 font-family: 'Press Start 2P', cursive;
                 font-size: 18px;
-                color: #00ff00;
+                color: #0080ff;
                 text-shadow:
                     2px 2px 0px #000,
-                    0 0 10px rgba(0, 255, 0, 0.5);
+                    0 0 10px rgba(0, 128, 255, 0.5);
                 letter-spacing: 1px;
                 margin: 15px 0 0 0;
                 padding: 0;
                 line-height: 1.8;
+            }
+
+            .wave-text {
+                color: #00ff00;
+                text-shadow:
+                    2px 2px 0px #000,
+                    0 0 10px rgba(0, 255, 0, 0.6);
             }
 
             .credits-box {
@@ -489,7 +499,7 @@
 
         <div class="title-overlay">
             <h1 class="title-main">AURORA FLOW</h1>
-            <p class="instruction-text">SHOW ME YOUR HAND<br>&lt;in front of the camera&gt;</p>
+            <p class="instruction-text"><span class="wave-text">Just Wave 👋</span><br>&lt;in front of the camera&gt;</p>
         </div>
 
         <div class="credits-box">

@@ -343,7 +343,7 @@ function startGUI () {
     let github = gui.add({ fun : () => {
         window.open('https://github.com/liviaellen/Fluid-Jedi-Simulation');
         ga('send', 'event', 'link button', 'github');
-    } }, 'fun').name('Open Source Code');
+    } }, 'fun').name('Source Code');
     github.__li.className = 'cr function bigFont';
     github.__li.style.borderLeft = '3px solid #0080ff';
     let githubIcon = document.createElement('span');
