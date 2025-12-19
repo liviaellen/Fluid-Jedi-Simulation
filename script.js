@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2017 Pavel Dobryakov
+Copyright (c) 2025 Livia Ellen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -222,23 +222,18 @@ function supportRenderTextureFormat (gl, internalFormat, format, type) {
 }
 
 function startGUI () {
-    var gui = new dat.GUI({ width: 300 });
-    gui.add(config, 'DYE_RESOLUTION', { 'high': 1024, 'medium': 512, 'low': 256, 'very low': 128 }).name('quality').onFinishChange(initFramebuffers);
-    gui.add(config, 'SIM_RESOLUTION', { '32': 32, '64': 64, '128': 128, '256': 256 }).name('sim resolution').onFinishChange(initFramebuffers);
-    gui.add(config, 'DENSITY_DISSIPATION', 0, 4.0).name('density diffusion');
-    gui.add(config, 'VELOCITY_DISSIPATION', 0, 4.0).name('velocity diffusion');
-    gui.add(config, 'PRESSURE', 0.0, 1.0).name('pressure');
-    gui.add(config, 'CURL', 0, 50).name('vorticity').step(1);
-    gui.add(config, 'SPLAT_RADIUS', 0.01, 1.0).name('splat radius');
-    gui.add(config, 'SHADING').name('shading').onFinishChange(updateKeywords);
-    gui.add(config, 'COLORFUL').name('colorful');
-    gui.add(config, 'PAUSED').name('paused').listen();
+    var gui = new dat.GUI({ width: 320 });
 
+    // Main Controls
+    gui.add(config, 'PAUSED').name('⏸ Paused').listen();
+    gui.add(config, 'COLORFUL').name('🌈 Colorful');
     gui.add({ fun: () => {
         splatStack.push(parseInt(Math.random() * 20) + 5);
-    } }, 'fun').name('Random splats');
+    } }, 'fun').name('✨ Random Splats');
+    gui.add(config, 'SPLAT_RADIUS', 0.01, 1.0).name('Splat Radius');
 
-    let bloomFolder = gui.addFolder('Bloom');
+    // Visual Effects
+    let bloomFolder = gui.addFolder('Bloom Effects');
     bloomFolder.add(config, 'BLOOM').name('enabled').onFinishChange(updateKeywords);
     bloomFolder.add(config, 'BLOOM_INTENSITY', 0.1, 2.0).name('intensity');
     bloomFolder.add(config, 'BLOOM_THRESHOLD', 0.0, 1.0).name('threshold');
@@ -247,17 +242,32 @@ function startGUI () {
     sunraysFolder.add(config, 'SUNRAYS').name('enabled').onFinishChange(updateKeywords);
     sunraysFolder.add(config, 'SUNRAYS_WEIGHT', 0.3, 1.0).name('weight');
 
+    gui.add(config, 'SHADING').name('Shading').onFinishChange(updateKeywords);
+
+    // Quality Settings
+    gui.add(config, 'DYE_RESOLUTION', { 'high': 1024, 'medium': 512, 'low': 256, 'very low': 128 }).name('Quality').onFinishChange(initFramebuffers);
+    gui.add(config, 'SIM_RESOLUTION', { '32': 32, '64': 64, '128': 128, '256': 256 }).name('Sim Resolution').onFinishChange(initFramebuffers);
+
+    // Advanced Settings
+    let advancedFolder = gui.addFolder('Advanced');
+    advancedFolder.add(config, 'DENSITY_DISSIPATION', 0, 4.0).name('density diffusion');
+    advancedFolder.add(config, 'VELOCITY_DISSIPATION', 0, 4.0).name('velocity diffusion');
+    advancedFolder.add(config, 'PRESSURE', 0.0, 1.0).name('pressure');
+    advancedFolder.add(config, 'CURL', 0, 50).name('vorticity').step(1);
+
+    // Capture
     let captureFolder = gui.addFolder('Capture');
     captureFolder.addColor(config, 'BACK_COLOR').name('background color');
     captureFolder.add(config, 'TRANSPARENT').name('transparent');
     captureFolder.add({ fun: captureScreenshot }, 'fun').name('take screenshot');
 
+    // Social Links
     let github = gui.add({ fun : () => {
         window.open('https://github.com/liviaellen/Fluid-Jedi-Simulation');
         ga('send', 'event', 'link button', 'github');
     } }, 'fun').name('Github');
     github.__li.className = 'cr function bigFont';
-    github.__li.style.borderLeft = '3px solid #8C8C8C';
+    github.__li.style.borderLeft = '3px solid #00ff00';
     let githubIcon = document.createElement('span');
     github.domElement.parentElement.appendChild(githubIcon);
     githubIcon.className = 'icon github';
@@ -267,7 +277,7 @@ function startGUI () {
         window.open('https://twitter.com/ellen_in_sf');
     } }, 'fun').name('Twitter');
     twitter.__li.className = 'cr function bigFont';
-    twitter.__li.style.borderLeft = '3px solid #8C8C8C';
+    twitter.__li.style.borderLeft = '3px solid #00ff00';
     let twitterIcon = document.createElement('span');
     twitter.domElement.parentElement.appendChild(twitterIcon);
     twitterIcon.className = 'icon twitter';

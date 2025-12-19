@@ -151,23 +151,60 @@
             }
 
             .dg {
-                opacity: 0.9;
+                opacity: 0.95;
+                font-family: 'Press Start 2P', monospace;
             }
 
             .dg .property-name {
                 overflow: visible;
             }
 
+            .dg.main {
+                background: rgba(0, 0, 0, 0.9);
+                border: 2px solid #00ff00;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            }
+
+            .dg.main .close-button {
+                background-color: #00ff00;
+            }
+
+            .dg li:not(.folder) {
+                background: rgba(0, 20, 0, 0.5);
+                border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+            }
+
+            .dg li.title {
+                background: rgba(0, 50, 0, 0.8);
+                color: #00ff00;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+            }
+
+            .dg .cr.number input[type=text] {
+                background: rgba(0, 0, 0, 0.7);
+                border: 1px solid #00ff00;
+                color: #00ff00;
+            }
+
+            .dg .cr.number input[type=text]:hover {
+                background: rgba(0, 50, 0, 0.5);
+            }
+
+            .dg .cr.boolean {
+                border-left: 3px solid #00ff00;
+            }
+
             .bigFont {
                 font-size: 150%;
-                color: #8C8C8C;
+                color: #00ff00;
+                text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
             }
 
             .cr.function.appBigFont {
                 font-size: 150%;
                 line-height: 27px;
-                color: #A5F8D3;
-                background-color: #023C40;
+                color: #00ff00;
+                background-color: rgba(0, 50, 0, 0.8);
             }
 
             .cr.function.appBigFont .property-name {
@@ -300,7 +337,7 @@
         <canvas></canvas>
 
         <div class="title-overlay">
-            <h1 class="title-main">✨ AURORA FLOW</h1>
+            <h1 class="title-main">AURORA FLOW</h1>
             <p class="instruction-text">SHOW ME YOUR HAND<br>&lt;in front of the camera&gt;</p>
         </div>
 
