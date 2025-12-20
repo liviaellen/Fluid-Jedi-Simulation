@@ -4,15 +4,21 @@ A stunning WebGL fluid simulation controlled by hand tracking with ambient music
 
 **✨ Live Demo: https://liviaellen.github.io/Fluid-Jedi-Simulation/**
 
-## Features
-
 - **Hand Tracking Control**: Use your hands to control the fluid in real-time
 - **MediaPipe Integration**: Advanced hand detection and tracking
 - **Dual Hand Support**: Control with both hands simultaneously
 - **GPU-Accelerated Physics**: Smooth, real-time fluid simulation using WebGL
-- **Blue Cyberpunk Aesthetic**: Retro pixel-art style with glowing blue UI
+- **Multi-Mode Simulation**:
+  - **SOULS**: Dense, ethereal trails
+  - **AURORA**: Glowing, vibrant flows with Bloom and Sunrays
+  - **ABYSS**: Deep, high-contrast vortexes
+  - **CREATION**: Expansive, creative splats
+- **Visual Mode Highlighting**: Active mode is visually highlighted in the UI
+- **Watermarked Exports**: High-quality screenshots and video recordings automatically include creator credits for easy social sharing!
+- **Cyberpunk Aesthetic**: Retro pixel-art style with glowing UI and neon colors
 - **Ambient Music Player**: Atmospheric background music with volume controls
 - **Interactive Controls**:
+  - MODE Selection - Switch between pre-defined simulation styles
   - MOVE/FREEZE - Pause and play the simulation
   - MIX COLOR/SINGLE - Toggle between colorful and single color modes
   - SMALL/BIG - Adjust splat size
@@ -30,8 +36,10 @@ A stunning WebGL fluid simulation controlled by hand tracking with ambient music
 ## Controls
 
 ### Keyboard Shortcuts
+- **1, 2, 3, 4** - Switch simulation modes (Souls, Aurora, Abyss, Creation)
 - **P** - Toggle pause
-- **Space** - Generate random splats
+- **Space** - Big Bang! Generate random splats
+- **H** - Show/hide control panel
 
 ### Panel Controls
 - Adjust bloom effects, sunrays, and quality settings

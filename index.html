@@ -308,17 +308,20 @@
 
     /* Preset Button Styles */
     .dg .cr.function.preset-button {
-      width: calc(33.33% - 12px) !important;
-      display: block !important;
+      width: calc(25% - 10px) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       float: left !important;
-      margin: 6px !important;
+      margin: 5px !important;
       box-sizing: border-box !important;
-      font-size: 10px !important;
-      padding: 8px 0 !important;
+      font-size: 9px !important;
+      height: 44px !important;
+      padding: 0 !important;
       clear: none !important;
       border-radius: 4px !important;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.3px;
       transition: all 0.3s ease !important;
     }
 
@@ -326,6 +329,8 @@
       width: 100% !important;
       text-align: center !important;
       font-weight: bold !important;
+      margin: 0 !important;
+      padding: 0 !important;
     }
 
     .dg .cr.function.souls {
@@ -341,7 +346,7 @@
       box-shadow: 0 0 20px rgba(255, 0, 255, 0.6) !important;
     }
 
-    .dg .cr.function.explorer {
+    .dg .cr.function.aurora {
       border: 2px solid #00ff00 !important;
       background: rgba(0, 40, 0, 0.6) !important;
       box-shadow: 0 0 10px rgba(0, 255, 0, 0.3) !important;
@@ -349,7 +354,7 @@
       text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
     }
 
-    .dg .cr.function.explorer:hover {
+    .dg .cr.function.aurora:hover {
       background: rgba(0, 80, 0, 0.8) !important;
       box-shadow: 0 0 20px rgba(0, 255, 0, 0.6) !important;
     }
@@ -365,6 +370,20 @@
     .dg .cr.function.abyss:hover {
       background: rgba(0, 80, 80, 0.8) !important;
       box-shadow: 0 0 20px rgba(0, 255, 255, 0.6) !important;
+    }
+
+    .dg .cr.function.creation {
+      border: 2px solid #ffffff !important;
+      background: rgba(40, 40, 40, 0.6) !important;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.2) !important;
+      color: #ffffff !important;
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+      margin-bottom: 25px !important;
+    }
+
+    .dg .cr.function.creation:hover {
+      background: rgba(80, 80, 80, 0.8) !important;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4) !important;
     }
 
     .dg .property-name {
@@ -847,11 +866,11 @@
   </div>
 
   <script>
-    // Set default volume to 70%
+    // Set default volume to 60%
     document.addEventListener('DOMContentLoaded', function () {
       const audio = document.getElementById('ambient-audio');
       if (audio) {
-        audio.volume = 0.7;
+        audio.volume = 0.6;
       }
 
       // Wire up action buttons

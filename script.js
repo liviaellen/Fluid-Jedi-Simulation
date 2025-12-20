@@ -48,11 +48,11 @@ let config = {
   SIM_RESOLUTION: 128,
   DYE_RESOLUTION: 1024,
   CAPTURE_RESOLUTION: 512,
-  DENSITY_DISSIPATION: 1,
-  VELOCITY_DISSIPATION: 0.2,
-  PRESSURE: 0.8,
+  DENSITY_DISSIPATION: 4,
+  VELOCITY_DISSIPATION: 2.94,
+  PRESSURE: 0.34,
   PRESSURE_ITERATIONS: 20,
-  CURL: 30,
+  CURL: 13,
   SPLAT_RADIUS: 0.25,
   SPLAT_FORCE: 6000,
   SHADING: true,
@@ -70,6 +70,7 @@ let config = {
   SUNRAYS: true,
   SUNRAYS_RESOLUTION: 196,
   SUNRAYS_WEIGHT: 1.0,
+  ACTIVE_PRESET: 'Souls'
 }
 
 function pointerPrototype() {
@@ -96,6 +97,10 @@ let isRecording = false;
 let canvasStream = null;
 let audioStream = null;
 let combinedStream = null;
+let recordingCanvas = null;
+let recordingContext = null;
+let recordingAnimationId = null;
+let recordedMimeType = null;
 
 // Persistent Audio Context and Nodes
 let audioContext = null;
@@ -222,27 +227,50 @@ function startGUI() {
 
   // Preset Controls - Top Buttons
   const presets = {
-    Explorer: () => {
-      config.DENSITY_DISSIPATION = 1;
-      config.VELOCITY_DISSIPATION = 0.2;
-      config.PRESSURE = 0.8;
-      config.CURL = 30;
-      config.SPLAT_RADIUS = 0.25;
-      gui.updateDisplay();
-    },
-    Souls: () => {
+    Aurora: () => {
+      config.ACTIVE_PRESET = 'Aurora';
       config.DENSITY_DISSIPATION = 4;
       config.VELOCITY_DISSIPATION = 2.94;
       config.PRESSURE = 0.34;
       config.CURL = 13;
+      config.SPLAT_RADIUS = 0.16;
+      config.BLOOM = true;
+      config.BLOOM_INTENSITY = 0.4;
+      config.BLOOM_THRESHOLD = 0.42;
+      config.SUNRAYS = true;
+      config.SUNRAYS_WEIGHT = 1.0;
+      updateButtonStates();
+      gui.updateDisplay();
+      updateKeywords();
+    },
+    Souls: () => {
+      config.ACTIVE_PRESET = 'Souls';
+      config.DENSITY_DISSIPATION = 4;
+      config.VELOCITY_DISSIPATION = 2.94;
+      config.PRESSURE = 0.34;
+      config.CURL = 13;
+      config.SPLAT_RADIUS = 0.25;
+      updateButtonStates();
       gui.updateDisplay();
     },
     Abyss: () => {
+      config.ACTIVE_PRESET = 'Abyss';
       config.DENSITY_DISSIPATION = 1;
       config.VELOCITY_DISSIPATION = 0.2;
       config.PRESSURE = 0.8;
       config.CURL = 30;
       config.SPLAT_RADIUS = 0.01;
+      updateButtonStates();
+      gui.updateDisplay();
+    },
+    Creation: () => {
+      config.ACTIVE_PRESET = 'Creation';
+      config.DENSITY_DISSIPATION = 1;
+      config.VELOCITY_DISSIPATION = 0.2;
+      config.PRESSURE = 0.8;
+      config.CURL = 30;
+      config.SPLAT_RADIUS = 0.25;
+      updateButtonStates();
       gui.updateDisplay();
     }
   };
@@ -250,11 +278,14 @@ function startGUI() {
   let soulsBtn = gui.add(presets, 'Souls').name('SOULS');
   soulsBtn.__li.classList.add('preset-button', 'souls');
 
-  let explorerBtn = gui.add(presets, 'Explorer').name('EXPLORER');
-  explorerBtn.__li.classList.add('preset-button', 'explorer');
+  let auroraBtn = gui.add(presets, 'Aurora').name('AURORA');
+  auroraBtn.__li.classList.add('preset-button', 'aurora');
 
   let abyssBtn = gui.add(presets, 'Abyss').name('ABYSS');
   abyssBtn.__li.classList.add('preset-button', 'abyss');
+
+  let creationBtn = gui.add(presets, 'Creation').name('CREATION');
+  creationBtn.__li.classList.add('preset-button', 'creation');
 
   // Main Controls - Dual Buttons
 
@@ -311,6 +342,12 @@ function startGUI() {
 
   // Function to update button states
   function updateButtonStates() {
+    // Update preset buttons
+    soulsBtn.__li.classList.toggle('active', config.ACTIVE_PRESET === 'Souls');
+    auroraBtn.__li.classList.toggle('active', config.ACTIVE_PRESET === 'Aurora');
+    abyssBtn.__li.classList.toggle('active', config.ACTIVE_PRESET === 'Abyss');
+    creationBtn.__li.classList.toggle('active', config.ACTIVE_PRESET === 'Creation');
+
     // Update pause buttons
     if (config.PAUSED) {
       freezeButton.__li.classList.add('active');
@@ -381,7 +418,7 @@ function startGUI() {
     }
   }, 0);
 
-  // Add keyboard shortcut to show panel again (H key)
+  // Keyboard shortcuts
   window.addEventListener('keydown', (e) => {
     if (e.key === 'h' || e.key === 'H') {
       const showPanelBtn = document.getElementById('show-panel-btn');
@@ -390,6 +427,18 @@ function startGUI() {
         gui.domElement.classList.remove('panel-hidden');
       }
     }
+    if (e.key === 'p' || e.key === 'P') {
+      config.PAUSED = !config.PAUSED;
+      updateButtonStates();
+    }
+    if (e.key === ' ') {
+      e.preventDefault();
+      splatStack.push(parseInt(Math.random() * 20) + 5);
+    }
+    if (e.key === '1') presets.Souls();
+    if (e.key === '2') presets.Aurora();
+    if (e.key === '3') presets.Abyss();
+    if (e.key === '4') presets.Creation();
   });
 
   let bigBangButton = gui.add({
@@ -398,6 +447,10 @@ function startGUI() {
     }
   }, 'fun').name('Big Bang');
   bigBangButton.__li.classList.add('big-bang-button');
+
+  // Background (Relocated)
+  gui.addColor(config, 'BACK_COLOR').name('BG color');
+  gui.add(config, 'TRANSPARENT').name('transparent');
 
   // Splat Controls
   gui.add(config, 'SPLAT_RADIUS', 0.01, 1.0).name('splat radius');
@@ -424,10 +477,6 @@ function startGUI() {
   gui.add(config, 'DYE_RESOLUTION', { 'high': 1024, 'medium': 512, 'low': 256, 'very low': 128 }).name('Quality').onFinishChange(initFramebuffers);
   gui.add(config, 'SIM_RESOLUTION', { '32': 32, '64': 64, '128': 128, '256': 256 }).name('Sim Resolution').onFinishChange(initFramebuffers);
 
-  // Background
-  let captureFolder = gui.addFolder('Background');
-  captureFolder.addColor(config, 'BACK_COLOR').name('BG color');
-  captureFolder.add(config, 'TRANSPARENT').name('transparent');
 
   // Social Links
   let github = gui.add({
@@ -513,6 +562,37 @@ function clamp01(input) {
   return Math.min(Math.max(input, 0), 1);
 }
 
+function drawWatermark(ctx, width, height) {
+  const fontSize = Math.max(12, Math.floor(width / 40));
+  ctx.font = `${fontSize}px Inter, sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'bottom';
+
+  const text = 'by Livia Ellen @ellen_in_sf';
+  const padding = 20;
+
+  // Shadow for readability
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+
+  // Semi-transparent background for extreme cases
+  const metrics = ctx.measureText(text);
+  const textWidth = metrics.width;
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.fillRect(width - textWidth - padding - 5, height - fontSize - padding - 5, textWidth + 10, fontSize + 10);
+
+  ctx.fillStyle = 'white';
+  ctx.fillText(text, width - padding, height - padding);
+
+  // Reset shadow
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+}
+
 function textureToCanvas(texture, width, height) {
   let captureCanvas = document.createElement('canvas');
   let ctx = captureCanvas.getContext('2d');
@@ -522,6 +602,9 @@ function textureToCanvas(texture, width, height) {
   let imageData = ctx.createImageData(width, height);
   imageData.data.set(texture);
   ctx.putImageData(imageData, 0, 0);
+
+  // Add watermark to screenshot
+  drawWatermark(ctx, width, height);
 
   return captureCanvas;
 }
@@ -549,9 +632,34 @@ function startRecording() {
     // Reset recorded chunks
     recordedChunks = [];
 
-    // Step 1: Capture canvas stream at 60fps
-    canvasStream = canvas.captureStream(60);
-    console.log('Canvas stream captured:', canvasStream);
+    // Step 1: Prepare Proxy Canvas for watermarked recording
+    if (!recordingCanvas) {
+      recordingCanvas = document.createElement('canvas');
+      recordingContext = recordingCanvas.getContext('2d');
+    }
+    recordingCanvas.width = canvas.width;
+    recordingCanvas.height = canvas.height;
+
+    // Start composition loop
+    function updateRecordingCanvas() {
+      if (!isRecording) return;
+
+      // Draw main simulation
+      recordingContext.drawImage(canvas, 0, 0);
+
+      // Overlay watermark
+      drawWatermark(recordingContext, recordingCanvas.width, recordingCanvas.height);
+
+      recordingAnimationId = requestAnimationFrame(updateRecordingCanvas);
+    }
+
+    // Set isRecording before starting the loop
+    isRecording = true;
+    updateRecordingCanvas();
+
+    // Step 2: Capture stream from proxy canvas instead of WebGL canvas
+    canvasStream = recordingCanvas.captureStream(60);
+    console.log('Recording stream captured (with watermark):', canvasStream);
 
     // Step 2: Capture audio from the audio element
     const audioElement = document.getElementById('ambient-audio');
@@ -599,20 +707,32 @@ function startRecording() {
       console.warn('No audio track available - recording video only');
     }
 
-    // Step 4: Determine supported MIME type
-    let mimeType = 'video/webm;codecs=vp9,opus';
-    if (!MediaRecorder.isTypeSupported(mimeType)) {
-      mimeType = 'video/webm;codecs=vp8,opus';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm';
-        console.warn('Using fallback MIME type:', mimeType);
+    // Step 4: Determine supported MIME type - Prioritize MP4
+    const mimeTypes = [
+      'video/mp4;codecs=h264,opus',
+      'video/mp4;codecs=h264,aac',
+      'video/mp4',
+      'video/webm;codecs=vp9,opus',
+      'video/webm;codecs=vp8,opus',
+      'video/webm'
+    ];
+
+    recordedMimeType = null;
+    for (const type of mimeTypes) {
+      if (MediaRecorder.isTypeSupported(type)) {
+        recordedMimeType = type;
+        break;
       }
     }
-    console.log('Using MIME type:', mimeType);
+
+    if (!recordedMimeType) {
+      throw new Error('No supported video MIME types found in this browser');
+    }
+    console.log('Using MIME type for recording:', recordedMimeType);
 
     // Step 5: Create MediaRecorder with optimal settings
     const options = {
-      mimeType: mimeType,
+      mimeType: recordedMimeType,
       videoBitsPerSecond: 5000000 // 5 Mbps for high quality
     };
 
@@ -670,6 +790,12 @@ function stopRecording() {
   mediaRecorder.stop();
   isRecording = false;
 
+  // Stop composition loop
+  if (recordingAnimationId) {
+    cancelAnimationFrame(recordingAnimationId);
+    recordingAnimationId = null;
+  }
+
   ga('send', 'event', 'recording', 'stop');
 
   // Update button state
@@ -685,16 +811,17 @@ function downloadRecording() {
     return;
   }
 
-  // Create blob from recorded chunks
-  const blob = new Blob(recordedChunks, { type: 'video/webm' });
-  console.log('Created blob:', blob.size, 'bytes');
+  // Create blob from recorded chunks using the actual recorded type
+  const blob = new Blob(recordedChunks, { type: recordedMimeType });
+  console.log('Created blob:', blob.size, 'bytes', 'Type:', recordedMimeType);
 
   // Create download URL
   const url = URL.createObjectURL(blob);
 
-  // Generate filename with timestamp
+  // Generate filename with timestamp and correct extension
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-  const filename = `aurora-flow-${timestamp}.webm`;
+  const extension = recordedMimeType.includes('mp4') ? 'mp4' : 'webm';
+  const filename = `aurora-flow-${timestamp}.${extension}`;
 
   // Trigger download
   downloadURI(filename, url);
@@ -1926,12 +2053,6 @@ window.addEventListener('touchend', e => {
 });
 */
 
-window.addEventListener('keydown', e => {
-  if (e.code === 'KeyP')
-    config.PAUSED = !config.PAUSED;
-  if (e.key === ' ')
-    splatStack.push(parseInt(Math.random() * 20) + 5);
-});
 
 function updatePointerDownData(pointer, id, posX, posY) {
   pointer.id = id;
@@ -2054,11 +2175,3 @@ function hashCode(s) {
   }
   return hash;
 };
-
-// Keyboard controls
-window.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    config.PAUSED = !config.PAUSED;
-  }
-});
