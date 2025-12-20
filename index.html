@@ -1,811 +1,892 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="Cache-Control" content="no-cache">
-
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="mobile-web-app-capable" content="yes">
-
-        <link rel="apple-touch-icon" href="logo.png">
-        <link rel="icon" href="logo.png">
-
-        <title>Aurora Flow by Livia Ellen</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-        <meta name="description" content="A WebGL fluid simulation controlled by hand tracking - by Livia Ellen (@ellen_in_sf)">
-
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="Webgl Fluid Simulation">
-        <meta property="og:description" content="A WebGL fluid simulation that works in mobile browsers.">
-        <meta property="og:url" content="https://paveldogreat.github.io/WebGL-Fluid-Simulation/">
-        <meta property="og:image" content="https://paveldogreat.github.io/WebGL-Fluid-Simulation/logo.png">
-
-        <script type="text/javascript" src="dat.gui.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js" crossorigin="anonymous"></script>
-        <style>
-            @font-face {
-                font-family: 'iconfont';
-                src: url('iconfont.ttf') format('truetype');
-            }
-
-            * {
-                user-select: none;
-            }
-
-            html, body {
-                overflow: hidden;
-                background-color: #000;
-            }
-
-            body {
-                margin: 0;
-                position: fixed;
-                width: 100%;
-                height: 100%;
-            }
-
-            canvas {
-                width: 100%;
-                height: 100%;
-            }
-
-            .title-overlay {
-                position: fixed;
-                top: 20px;
-                left: 50%;
-                transform: translateX(-50%);
-                text-align: center;
-                z-index: 100;
-                pointer-events: none;
-            }
-
-            .title-main {
-                font-family: 'Press Start 2P', cursive;
-                font-size: 32px;
-                color: #ff1493;
-                text-shadow:
-                    4px 4px 0px #990055,
-                    8px 8px 0px #000,
-                    0 0 20px rgba(255, 20, 147, 0.8),
-                    0 0 40px rgba(255, 105, 180, 0.6),
-                    0 0 60px rgba(255, 182, 193, 0.4);
-                letter-spacing: 2px;
-                margin: 0;
-                padding: 0;
-                line-height: 1.5;
-                image-rendering: pixelated;
-                image-rendering: -moz-crisp-edges;
-                image-rendering: crisp-edges;
-            }
-
-            .instruction-text {
-                font-family: 'Press Start 2P', cursive;
-                font-size: 18px;
-                color: #0080ff;
-                text-shadow:
-                    2px 2px 0px #000,
-                    0 0 10px rgba(0, 128, 255, 0.5);
-                letter-spacing: 1px;
-                margin: 15px 0 0 0;
-                padding: 0;
-                line-height: 1.8;
-            }
-
-            .wave-text {
-                color: #00ff00;
-                text-shadow:
-                    2px 2px 0px #000,
-                    0 0 10px rgba(0, 255, 0, 0.6);
-            }
-
-            .credits-box {
-                position: fixed;
-                bottom: 15px;
-                left: 15px;
-                z-index: 100;
-                pointer-events: none;
-                background: rgba(0, 0, 0, 0.85);
-                border: 2px solid #0080ff;
-                padding: 12px 16px;
-                font-family: 'Press Start 2P', cursive;
-                background-image:
-                    linear-gradient(0deg, transparent 24%, rgba(0, 128, 255, 0.05) 25%, rgba(0, 128, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 128, 255, 0.05) 75%, rgba(0, 128, 255, 0.05) 76%, transparent 77%, transparent),
-                    linear-gradient(90deg, transparent 24%, rgba(0, 128, 255, 0.05) 25%, rgba(0, 128, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 128, 255, 0.05) 75%, rgba(0, 128, 255, 0.05) 76%, transparent 77%, transparent);
-                background-size: 8px 8px;
-            }
-
-            .credits-name {
-                font-size: 10px;
-                color: #0080ff;
-                margin: 0;
-                padding: 0;
-                line-height: 1.6;
-                text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
-            }
-
-            .credits-handle {
-                font-size: 8px;
-                color: #0066cc;
-                margin: 4px 0 0 0;
-                padding: 0;
-                line-height: 1.6;
-                text-shadow: 0 0 3px rgba(0, 128, 255, 0.3);
-            }
-
-            @media (max-width: 768px) {
-                .title-main {
-                    font-size: 16px;
-                    letter-spacing: 1px;
-                }
-                .instruction-text {
-                    font-size: 10px;
-                    letter-spacing: 0.5px;
-                    margin: 10px 0 0 0;
-                }
-                .credits-box {
-                    bottom: 10px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    padding: 8px 12px;
-                }
-                .credits-name {
-                    font-size: 8px;
-                }
-                .credits-handle {
-                    font-size: 6px;
-                }
-
-                /* Hide control panel on mobile */
-                .dg.main {
-                    display: none !important;
-                }
-
-                /* Hide show panel button on mobile */
-                .show-panel-button {
-                    display: none !important;
-                }
-            }
-
-            .dg {
-                opacity: 0.95;
-                font-family: 'Press Start 2P', monospace;
-            }
-
-            .dg .property-name {
-                overflow: visible;
-            }
-
-            .dg.main {
-                background: rgba(0, 0, 0, 0.9);
-                border: 2px solid #0080ff;
-                box-shadow: 0 0 20px rgba(0, 128, 255, 0.3);
-                transition: transform 0.3s ease-in-out;
-            }
-
-            .dg.main.panel-hidden {
-                transform: translateX(100%);
-            }
-
-            .dg.main .close-button {
-                background-color: #0080ff;
-            }
-
-            .dg li:not(.folder) {
-                background: rgba(0, 20, 40, 0.7) !important;
-                border-bottom: 1px solid rgba(0, 128, 255, 0.2);
-            }
-
-            .dg li.title {
-                background: rgba(0, 40, 80, 0.95) !important;
-                color: #0080ff !important;
-                text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
-            }
-
-            .dg .folder .dg li {
-                background: rgba(0, 30, 60, 0.85) !important;
-            }
-
-            .dg .folder .cr {
-                background: rgba(0, 30, 60, 0.85) !important;
-                border-bottom: 1px solid rgba(0, 128, 255, 0.15);
-            }
-
-            .dg .cr.number input[type=text] {
-                background: rgba(0, 0, 0, 0.7);
-                border: 1px solid #0080ff;
-                color: #0080ff;
-            }
-
-            .dg .cr.number input[type=text]:hover {
-                background: rgba(0, 20, 50, 0.5);
-            }
-
-            .dg .cr.boolean {
-                border-left: 3px solid #0080ff;
-            }
-
-            .dg .cr.function {
-                background: rgba(0, 40, 80, 0.6);
-                border: 2px solid #0080ff !important;
-                border-radius: 4px;
-                margin: 6px 4px !important;
-                box-shadow: 0 0 10px rgba(0, 128, 255, 0.3);
-                cursor: pointer !important;
-                pointer-events: auto !important;
-                position: relative;
-                z-index: 10;
-                font-size: 9px !important;
-            }
-
-            .dg .cr.function.dual-button {
-                width: calc(50% - 8px) !important;
-                display: inline-block !important;
-                float: left !important;
-                margin: 4px !important;
-                box-sizing: border-box !important;
-            }
-
-            .dg .cr.function.dual-left {
-                clear: left !important;
-            }
-
-            .dg .cr.function.dual-right {
-                clear: none !important;
-            }
-
-            .dg li.cr.function.dual-button::after {
-                content: '';
-                display: table;
-                clear: both;
-            }
-
-            .dg .cr.function:hover {
-                background: rgba(0, 80, 160, 0.8);
-                box-shadow: 0 0 15px rgba(0, 128, 255, 0.6);
-            }
-
-            .dg .cr.function:active {
-                background: rgba(0, 100, 200, 0.9);
-                box-shadow: 0 0 20px rgba(0, 128, 255, 0.8);
-            }
-
-            .dg .cr.function .property-name {
-                text-align: center;
-                font-weight: bold;
-                letter-spacing: 1px;
-            }
-
-            .dg .cr.function.big-bang-button .property-name {
-                width: 100% !important;
-                float: none !important;
-                text-align: center !important;
-                display: block !important;
-            }
-
-            .dg .cr.function.active {
-                background: rgba(0, 120, 255, 0.9) !important;
-                box-shadow: 0 0 20px rgba(0, 128, 255, 0.8), inset 0 0 15px rgba(0, 128, 255, 0.5);
-                border-color: #0080ff !important;
-            }
-
-            .dg .cr.function.active .property-name {
-                color: #ffffff !important;
-                text-shadow: 0 0 10px rgba(0, 128, 255, 1);
-            }
-
-            .dg .property-name {
-                color: #0080ff !important;
-                text-shadow: 0 0 3px rgba(0, 128, 255, 0.5);
-            }
-
-            .dg .c select {
-                background: rgba(0, 0, 0, 0.8);
-                border: 1px solid #0080ff;
-                color: #0080ff;
-            }
-
-            .dg .c input[type=checkbox] {
-                margin-top: 9px;
-            }
-
-            .dg .slider {
-                background: rgba(0, 0, 0, 0.5) !important;
-            }
-
-            .dg .slider-fg {
-                background: #0080ff !important;
-            }
-
-            .dg.a {
-                margin-right: 0;
-            }
-
-            .bigFont {
-                font-size: 150%;
-                color: #0080ff;
-                text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
-            }
-
-            .cr.function.appBigFont {
-                font-size: 150%;
-                line-height: 27px;
-                color: #0080ff;
-                background-color: rgba(0, 40, 80, 0.8);
-            }
-
-            /* Video Recording Button Styles */
-            .dg .cr.function.record-button {
-                background: rgba(40, 0, 80, 0.6) !important;
-                border: 2px solid #ff1493 !important;
-                box-shadow: 0 0 10px rgba(255, 20, 147, 0.3) !important;
-            }
-
-            .dg .cr.function.record-button:hover {
-                background: rgba(80, 0, 160, 0.8) !important;
-                box-shadow: 0 0 15px rgba(255, 20, 147, 0.6) !important;
-            }
-
-            .dg .cr.function.record-button.active {
-                background: rgba(255, 20, 147, 0.9) !important;
-                box-shadow: 0 0 20px rgba(255, 20, 147, 0.8), inset 0 0 15px rgba(255, 20, 147, 0.5) !important;
-                border-color: #ff1493 !important;
-                animation: recording-pulse 1.5s ease-in-out infinite !important;
-            }
-
-            .dg .cr.function.record-button.active .property-name {
-                color: #ffffff !important;
-                text-shadow: 0 0 10px rgba(255, 20, 147, 1) !important;
-            }
-
-            @keyframes recording-pulse {
-                0%, 100% {
-                    box-shadow: 0 0 20px rgba(255, 20, 147, 0.8), inset 0 0 15px rgba(255, 20, 147, 0.5);
-                }
-                50% {
-                    box-shadow: 0 0 30px rgba(255, 20, 147, 1), inset 0 0 20px rgba(255, 20, 147, 0.7);
-                }
-            }
-
-            /* Bottom Center Action Buttons */
-            .bottom-actions {
-                position: fixed;
-                bottom: 30px;
-                left: 50%;
-                transform: translateX(-50%);
-                display: flex;
-                gap: 20px;
-                z-index: 100;
-            }
-
-            .action-button {
-                font-family: 'Press Start 2P', monospace;
-                font-size: 12px;
-                padding: 15px 25px;
-                background: rgba(0, 40, 80, 0.85);
-                border: 2px solid #0080ff;
-                border-radius: 8px;
-                color: #0080ff;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                transition: all 0.3s ease;
-                box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
-                text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
-            }
-
-            .action-button:hover {
-                background: rgba(0, 80, 160, 0.9);
-                box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
-                transform: translateY(-2px);
-            }
-
-            .action-button .button-icon {
-                font-size: 16px;
-            }
-
-            .action-button .button-label {
-                font-size: 11px;
-            }
-
-            /* Screenshot Button */
-            .screenshot-btn {
-                border-color: #0080ff;
-                color: #0080ff;
-                box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
-                text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
-            }
-
-            .screenshot-btn:hover {
-                background: rgba(0, 80, 160, 0.9);
-                box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
-            }
-
-            /* Record Button */
-            .record-btn {
-                border-color: #0080ff;
-                color: #0080ff;
-                box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
-                text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
-            }
-
-            .record-btn:hover {
-                background: rgba(0, 80, 160, 0.9);
-                box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
-            }
-
-            .record-btn.recording {
-                background: rgba(255, 20, 147, 0.9);
-                animation: recording-pulse 1.5s ease-in-out infinite;
-                color: #ffffff;
-            }
-
-            .record-btn.recording .button-label {
-                content: 'STOP';
-            }
-
-            /* Mobile responsive */
-            @media (max-width: 600px) {
-                .bottom-actions {
-                    bottom: 15px;
-                    gap: 10px;
-                }
-
-                .action-button {
-                    font-size: 10px;
-                    padding: 12px 20px;
-                }
-
-                .action-button .button-icon {
-                    font-size: 14px;
-                }
-
-                .action-button .button-label {
-                    font-size: 9px;
-                }
-            }
-
-            .cr.function.appBigFont .property-name {
-                float: none;
-            }
-
-            .cr.function.appBigFont .icon {
-                position: sticky;
-                bottom: 27px;
-            }
-
-            .icon {
-                font-family: 'iconfont';
-                font-size: 130%;
-                float: right;
-            }
-
-            .twitter:before {
-                content: 'a';
-            }
-
-            .github:before {
-                content: 'b';
-            }
-
-            .app:before {
-                content: 'c';
-            }
-
-            .discord:before {
-                content: 'd';
-            }
-
-            .promo {
-                display: none;
-                /* display: table; */
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 1;
-                overflow: auto;
-                color: lightblue;
-                background-color: rgba(0,0,0,0.4);
-                animation: promo-appear-animation 0.35s ease-out;
-            }
-
-            .promo-middle {
-                display: table-cell;
-                vertical-align: middle;
-            }
-
-            .promo-content {
-                width: 80vw;
-                height: 80vh;
-                max-width: 80vh;
-                max-height: 80vw;
-                margin: auto;
-                padding: 0;
-                font-size: 2.8vmax;
-                font-family: Futura, "Trebuchet MS", Arial, sans-serif;
-                text-align: center;
-                background-image: url("promo_back.png");
-                background-position: center;
-                background-repeat: no-repeat;
-                background-size: cover;
-                border-radius: 15px;
-                box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-            }
-
-            .promo-header {
-                height: 10%;
-                padding: 2px 16px;
-            }
-
-            .promo-close {
-                width: 10%;
-                height: 100%;
-                text-align: left;
-                float: left;
-                font-size: 1.3em;
-                /* transition: 0.2s; */
-            }
-
-            .promo-close:hover {
-                /* transform: scale(1.25); */
-                cursor: pointer;
-            }
-
-            .promo-body {
-                padding: 8px 16px 16px 16px;
-                margin: auto;
-            }
-
-            .promo-body p {
-                margin-top: 0;
-                mix-blend-mode: color-dodge;
-            }
-
-            .link {
-                width: 100%;
-                display: inline-block;
-            }
-
-            .link img {
-                width: 100%;
-            }
-
-            @keyframes promo-appear-animation {
-                0% {
-                    transform: scale(2.0);
-                    opacity: 0;
-                }
-                100% {
-                    transform: scale(1.0);
-                    opacity: 1;
-                }
-            }
-
-            .music-player {
-                position: fixed;
-                bottom: 15px;
-                right: 15px;
-                z-index: 100;
-                background: rgba(0, 0, 0, 0.85);
-                border: 2px solid #0080ff;
-                padding: 10px 15px;
-                font-family: 'Press Start 2P', cursive;
-                font-size: 8px;
-                color: #0080ff;
-                text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
-                background-image:
-                    linear-gradient(0deg, transparent 24%, rgba(0, 128, 255, 0.05) 25%, rgba(0, 128, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 128, 255, 0.05) 75%, rgba(0, 128, 255, 0.05) 76%, transparent 77%, transparent),
-                    linear-gradient(90deg, transparent 24%, rgba(0, 128, 255, 0.05) 25%, rgba(0, 128, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 128, 255, 0.05) 75%, rgba(0, 128, 255, 0.05) 76%, transparent 77%, transparent);
-                background-size: 8px 8px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .music-player audio {
-                width: 200px;
-                height: 20px;
-            }
-
-            .music-label {
-                white-space: nowrap;
-                line-height: 1.6;
-                animation: glow 2s ease-in-out infinite;
-            }
-
-            @keyframes glow {
-                0%, 100% {
-                    text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
-                }
-                50% {
-                    text-shadow: 0 0 10px rgba(0, 128, 255, 0.8), 0 0 20px rgba(0, 128, 255, 0.4);
-                }
-            }
-
-            @media (max-width: 768px) {
-                .music-player {
-                    bottom: 80px;
-                    right: 10px;
-                    padding: 8px 10px;
-                    font-size: 6px;
-                }
-                .music-player audio {
-                    width: 150px;
-                    height: 18px;
-                }
-            }
-
-            .show-panel-button {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 1000;
-                background: rgba(0, 40, 80, 0.9);
-                border: 2px solid #0080ff;
-                border-radius: 4px;
-                padding: 12px 20px;
-                font-family: 'Press Start 2P', cursive;
-                font-size: 10px;
-                color: #0080ff;
-                text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
-                cursor: pointer;
-                box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
-                transition: all 0.3s ease;
-            }
-
-            .show-panel-button:hover {
-                background: rgba(0, 80, 160, 0.9);
-                box-shadow: 0 0 20px rgba(0, 128, 255, 0.6);
-                transform: scale(1.05);
-            }
-
-            .show-panel-button:active {
-                background: rgba(0, 120, 255, 0.9);
-                box-shadow: 0 0 25px rgba(0, 128, 255, 0.8);
-            }
-
-            @media (max-width: 768px) {
-                .show-panel-button {
-                    top: 10px;
-                    right: 10px;
-                    padding: 8px 12px;
-                    font-size: 7px;
-                }
-            }
-
-            .hide-panel-ribbon {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: linear-gradient(180deg, rgba(0, 40, 80, 0.8) 0%, rgba(0, 80, 160, 0.95) 100%);
-                border-top: 2px solid #0080ff;
-                border-bottom: 2px solid #0080ff;
-                padding: 12px;
-                text-align: center;
-                font-family: 'Press Start 2P', cursive;
-                font-size: 10px;
-                color: #0080ff;
-                text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
-                cursor: pointer;
-                box-shadow: 0 -4px 15px rgba(0, 128, 255, 0.3), inset 0 2px 10px rgba(0, 128, 255, 0.2);
-                transition: all 0.2s ease;
-                z-index: 1000;
-                letter-spacing: 2px;
-            }
-
-            .hide-panel-ribbon:hover {
-                background: linear-gradient(180deg, rgba(0, 60, 120, 0.9) 0%, rgba(0, 100, 200, 1) 100%);
-                text-shadow: 0 0 12px rgba(0, 128, 255, 1);
-                box-shadow: 0 -6px 20px rgba(0, 128, 255, 0.5), inset 0 2px 15px rgba(0, 128, 255, 0.4);
-            }
-
-            .hide-panel-ribbon:active {
-                background: linear-gradient(180deg, rgba(0, 80, 160, 1) 0%, rgba(0, 120, 255, 1) 100%);
-                transform: scale(0.98);
-            }
-        </style>
-        <script>
-            window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
-            ga('create', 'UA-105392568-1', 'auto');
-            ga('send', 'pageview');
-        </script>
-        <script async src="https://www.google-analytics.com/analytics.js"></script>
-    </head>
-    <body>
-        <video class="input_video" style="display: none;"></video>
-        <canvas></canvas>
-
-        <div class="title-overlay">
-            <h1 class="title-main">AURORA FLOW</h1>
-            <p class="instruction-text"><span class="wave-text">Just wave 👋 or pinch 🤏</span><br>&lt;in front of the camera&gt;</p>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <link rel="apple-touch-icon" href="logo.png">
+  <link rel="icon" href="logo.png">
+
+  <title>Aurora Flow by Livia Ellen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <meta name="description"
+    content="A WebGL fluid simulation controlled by hand tracking - by Livia Ellen (@ellen_in_sf)">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Webgl Fluid Simulation">
+  <meta property="og:description" content="A WebGL fluid simulation that works in mobile browsers.">
+  <meta property="og:url" content="https://paveldogreat.github.io/WebGL-Fluid-Simulation/">
+  <meta property="og:image" content="https://paveldogreat.github.io/WebGL-Fluid-Simulation/logo.png">
+
+  <script type="text/javascript" src="dat.gui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3/camera_utils.js"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js" crossorigin="anonymous"></script>
+  <style>
+    @font-face {
+      font-family: 'iconfont';
+      src: url('iconfont.ttf') format('truetype');
+    }
+
+    * {
+      user-select: none;
+    }
+
+    html,
+    body {
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    body {
+      margin: 0;
+      position: fixed;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .title-overlay {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .title-main {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 32px;
+      color: #ff1493;
+      text-shadow:
+        4px 4px 0px #990055,
+        8px 8px 0px #000,
+        0 0 20px rgba(255, 20, 147, 0.8),
+        0 0 40px rgba(255, 105, 180, 0.6),
+        0 0 60px rgba(255, 182, 193, 0.4);
+      letter-spacing: 2px;
+      margin: 0;
+      padding: 0;
+      line-height: 1.5;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+
+    .instruction-text {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 18px;
+      color: #0080ff;
+      text-shadow:
+        2px 2px 0px #000,
+        0 0 10px rgba(0, 128, 255, 0.5);
+      letter-spacing: 1px;
+      margin: 15px 0 0 0;
+      padding: 0;
+      line-height: 1.8;
+    }
+
+    .wave-text {
+      color: #00ff00;
+      text-shadow:
+        2px 2px 0px #000,
+        0 0 10px rgba(0, 255, 0, 0.6);
+    }
+
+    .credits-box {
+      position: fixed;
+      bottom: 15px;
+      left: 15px;
+      z-index: 100;
+      pointer-events: none;
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #0080ff;
+      padding: 12px 16px;
+      font-family: 'Press Start 2P', cursive;
+      background-image:
+        linear-gradient(0deg, transparent 24%, rgba(0, 128, 255, 0.05) 25%, rgba(0, 128, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 128, 255, 0.05) 75%, rgba(0, 128, 255, 0.05) 76%, transparent 77%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(0, 128, 255, 0.05) 25%, rgba(0, 128, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 128, 255, 0.05) 75%, rgba(0, 128, 255, 0.05) 76%, transparent 77%, transparent);
+      background-size: 8px 8px;
+    }
+
+    .credits-name {
+      font-size: 10px;
+      color: #0080ff;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+      text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
+    }
+
+    .credits-handle {
+      font-size: 8px;
+      color: #0066cc;
+      margin: 4px 0 0 0;
+      padding: 0;
+      line-height: 1.6;
+      text-shadow: 0 0 3px rgba(0, 128, 255, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .title-main {
+        font-size: 16px;
+        letter-spacing: 1px;
+      }
+
+      .instruction-text {
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        margin: 10px 0 0 0;
+      }
+
+      .credits-box {
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 12px;
+      }
+
+      .credits-name {
+        font-size: 8px;
+      }
+
+      .credits-handle {
+        font-size: 6px;
+      }
+
+      /* Hide control panel on mobile */
+      .dg.main {
+        display: none !important;
+      }
+
+      /* Hide show panel button on mobile */
+      .show-panel-button {
+        display: none !important;
+      }
+    }
+
+    .dg {
+      opacity: 0.95;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    .dg .property-name {
+      overflow: visible;
+    }
+
+    .dg.main {
+      background: rgba(0, 0, 0, 0.9);
+      border: 2px solid #0080ff;
+      box-shadow: 0 0 20px rgba(0, 128, 255, 0.3);
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .dg.main.panel-hidden {
+      transform: translateX(100%);
+    }
+
+    .dg.main .close-button {
+      background-color: #0080ff;
+    }
+
+    .dg li:not(.folder) {
+      background: rgba(0, 20, 40, 0.7) !important;
+      border-bottom: 1px solid rgba(0, 128, 255, 0.2);
+    }
+
+    .dg li.title {
+      background: rgba(0, 40, 80, 0.95) !important;
+      color: #0080ff !important;
+      text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
+    }
+
+    .dg .folder .dg li {
+      background: rgba(0, 30, 60, 0.85) !important;
+    }
+
+    .dg .folder .cr {
+      background: rgba(0, 30, 60, 0.85) !important;
+      border-bottom: 1px solid rgba(0, 128, 255, 0.15);
+    }
+
+    .dg .cr.number input[type=text] {
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #0080ff;
+      color: #0080ff;
+    }
+
+    .dg .cr.number input[type=text]:hover {
+      background: rgba(0, 20, 50, 0.5);
+    }
+
+    .dg .cr.boolean {
+      border-left: 3px solid #0080ff;
+    }
+
+    .dg .cr.function {
+      background: rgba(0, 40, 80, 0.6);
+      border: 2px solid #0080ff !important;
+      border-radius: 4px;
+      margin: 6px 4px !important;
+      box-shadow: 0 0 10px rgba(0, 128, 255, 0.3);
+      cursor: pointer !important;
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 10;
+      font-size: 9px !important;
+    }
+
+    .dg .cr.function.dual-button {
+      width: calc(50% - 8px) !important;
+      display: inline-block !important;
+      float: left !important;
+      margin: 4px !important;
+      box-sizing: border-box !important;
+    }
+
+    .dg .cr.function.dual-left {
+      clear: left !important;
+    }
+
+    .dg .cr.function.dual-right {
+      clear: none !important;
+    }
+
+    .dg li.cr.function.dual-button::after {
+      content: '';
+      display: table;
+      clear: both;
+    }
+
+    .dg .cr.function:hover {
+      background: rgba(0, 80, 160, 0.8);
+      box-shadow: 0 0 15px rgba(0, 128, 255, 0.6);
+    }
+
+    .dg .cr.function:active {
+      background: rgba(0, 100, 200, 0.9);
+      box-shadow: 0 0 20px rgba(0, 128, 255, 0.8);
+    }
+
+    .dg .cr.function .property-name {
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .dg .cr.function.big-bang-button .property-name {
+      width: 100% !important;
+      float: none !important;
+      text-align: center !important;
+      display: block !important;
+    }
+
+    .dg .cr.function.active {
+      background: rgba(0, 120, 255, 0.9) !important;
+      box-shadow: 0 0 20px rgba(0, 128, 255, 0.8), inset 0 0 15px rgba(0, 128, 255, 0.5);
+      border-color: #0080ff !important;
+    }
+
+    .dg .cr.function.active .property-name {
+      color: #ffffff !important;
+      text-shadow: 0 0 10px rgba(0, 128, 255, 1);
+    }
+
+    /* Preset Button Styles */
+    .dg .cr.function.preset-button {
+      width: calc(33.33% - 12px) !important;
+      display: block !important;
+      float: left !important;
+      margin: 6px !important;
+      box-sizing: border-box !important;
+      font-size: 10px !important;
+      padding: 8px 0 !important;
+      clear: none !important;
+      border-radius: 4px !important;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease !important;
+    }
+
+    .dg .cr.function.preset-button .property-name {
+      width: 100% !important;
+      text-align: center !important;
+      font-weight: bold !important;
+    }
+
+    .dg .cr.function.souls {
+      border: 2px solid #ff00ff !important;
+      background: rgba(40, 0, 40, 0.6) !important;
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.3) !important;
+      color: #ff00ff !important;
+      text-shadow: 0 0 5px rgba(255, 0, 255, 0.5);
+    }
+
+    .dg .cr.function.souls:hover {
+      background: rgba(80, 0, 80, 0.8) !important;
+      box-shadow: 0 0 20px rgba(255, 0, 255, 0.6) !important;
+    }
+
+    .dg .cr.function.explorer {
+      border: 2px solid #00ff00 !important;
+      background: rgba(0, 40, 0, 0.6) !important;
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3) !important;
+      color: #00ff00 !important;
+      text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    }
+
+    .dg .cr.function.explorer:hover {
+      background: rgba(0, 80, 0, 0.8) !important;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.6) !important;
+    }
+
+    .dg .cr.function.abyss {
+      border: 2px solid #00ffff !important;
+      background: rgba(0, 40, 40, 0.6) !important;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3) !important;
+      color: #00ffff !important;
+      text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+    }
+
+    .dg .cr.function.abyss:hover {
+      background: rgba(0, 80, 80, 0.8) !important;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6) !important;
+    }
+
+    .dg .property-name {
+      color: #0080ff !important;
+      text-shadow: 0 0 3px rgba(0, 128, 255, 0.5);
+    }
+
+    .dg .c select {
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid #0080ff;
+      color: #0080ff;
+    }
+
+    .dg .c input[type=checkbox] {
+      margin-top: 9px;
+    }
+
+    .dg .slider {
+      background: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .dg .slider-fg {
+      background: #0080ff !important;
+    }
+
+    .dg.a {
+      margin-right: 0;
+    }
+
+    .bigFont {
+      font-size: 150%;
+      color: #0080ff;
+      text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
+    }
+
+    .cr.function.appBigFont {
+      font-size: 150%;
+      line-height: 27px;
+      color: #0080ff;
+      background-color: rgba(0, 40, 80, 0.8);
+    }
+
+    /* Video Recording Button Styles */
+    .dg .cr.function.record-button {
+      background: rgba(40, 0, 80, 0.6) !important;
+      border: 2px solid #ff1493 !important;
+      box-shadow: 0 0 10px rgba(255, 20, 147, 0.3) !important;
+    }
+
+    .dg .cr.function.record-button:hover {
+      background: rgba(80, 0, 160, 0.8) !important;
+      box-shadow: 0 0 15px rgba(255, 20, 147, 0.6) !important;
+    }
+
+    .dg .cr.function.record-button.active {
+      background: rgba(255, 20, 147, 0.9) !important;
+      box-shadow: 0 0 20px rgba(255, 20, 147, 0.8), inset 0 0 15px rgba(255, 20, 147, 0.5) !important;
+      border-color: #ff1493 !important;
+      animation: recording-pulse 1.5s ease-in-out infinite !important;
+    }
+
+    .dg .cr.function.record-button.active .property-name {
+      color: #ffffff !important;
+      text-shadow: 0 0 10px rgba(255, 20, 147, 1) !important;
+    }
+
+    @keyframes recording-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(255, 20, 147, 0.8), inset 0 0 15px rgba(255, 20, 147, 0.5);
+      }
+
+      50% {
+        box-shadow: 0 0 30px rgba(255, 20, 147, 1), inset 0 0 20px rgba(255, 20, 147, 0.7);
+      }
+    }
+
+    /* Bottom Center Action Buttons */
+    .bottom-actions {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+      z-index: 100;
+    }
+
+    .action-button {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      padding: 15px 25px;
+      background: rgba(0, 40, 80, 0.85);
+      border: 2px solid #0080ff;
+      border-radius: 8px;
+      color: #0080ff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
+      text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
+    }
+
+    .action-button:hover {
+      background: rgba(0, 80, 160, 0.9);
+      box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .action-button .button-icon {
+      font-size: 16px;
+    }
+
+    .action-button .button-label {
+      font-size: 11px;
+    }
+
+    /* Screenshot Button */
+    .screenshot-btn {
+      border-color: #0080ff;
+      color: #0080ff;
+      box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
+      text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
+    }
+
+    .screenshot-btn:hover {
+      background: rgba(0, 80, 160, 0.9);
+      box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
+    }
+
+    /* Record Button */
+    .record-btn {
+      border-color: #0080ff;
+      color: #0080ff;
+      box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
+      text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
+    }
+
+    .record-btn:hover {
+      background: rgba(0, 80, 160, 0.9);
+      box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
+    }
+
+    .record-btn.recording {
+      background: rgba(255, 20, 147, 0.9);
+      animation: recording-pulse 1.5s ease-in-out infinite;
+      color: #ffffff;
+    }
+
+    .record-btn.recording .button-label {
+      content: 'STOP';
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 600px) {
+      .bottom-actions {
+        bottom: 15px;
+        gap: 10px;
+      }
+
+      .action-button {
+        font-size: 10px;
+        padding: 12px 20px;
+      }
+
+      .action-button .button-icon {
+        font-size: 14px;
+      }
+
+      .action-button .button-label {
+        font-size: 9px;
+      }
+    }
+
+    .cr.function.appBigFont .property-name {
+      float: none;
+    }
+
+    .cr.function.appBigFont .icon {
+      position: sticky;
+      bottom: 27px;
+    }
+
+    .icon {
+      font-family: 'iconfont';
+      font-size: 130%;
+      float: right;
+    }
+
+    .twitter:before {
+      content: 'a';
+    }
+
+    .github:before {
+      content: 'b';
+    }
+
+    .app:before {
+      content: 'c';
+    }
+
+    .discord:before {
+      content: 'd';
+    }
+
+    .promo {
+      display: none;
+      /* display: table; */
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: auto;
+      color: lightblue;
+      background-color: rgba(0, 0, 0, 0.4);
+      animation: promo-appear-animation 0.35s ease-out;
+    }
+
+    .promo-middle {
+      display: table-cell;
+      vertical-align: middle;
+    }
+
+    .promo-content {
+      width: 80vw;
+      height: 80vh;
+      max-width: 80vh;
+      max-height: 80vw;
+      margin: auto;
+      padding: 0;
+      font-size: 2.8vmax;
+      font-family: Futura, "Trebuchet MS", Arial, sans-serif;
+      text-align: center;
+      background-image: url("promo_back.png");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    .promo-header {
+      height: 10%;
+      padding: 2px 16px;
+    }
+
+    .promo-close {
+      width: 10%;
+      height: 100%;
+      text-align: left;
+      float: left;
+      font-size: 1.3em;
+      /* transition: 0.2s; */
+    }
+
+    .promo-close:hover {
+      /* transform: scale(1.25); */
+      cursor: pointer;
+    }
+
+    .promo-body {
+      padding: 8px 16px 16px 16px;
+      margin: auto;
+    }
+
+    .promo-body p {
+      margin-top: 0;
+      mix-blend-mode: color-dodge;
+    }
+
+    .link {
+      width: 100%;
+      display: inline-block;
+    }
+
+    .link img {
+      width: 100%;
+    }
+
+    @keyframes promo-appear-animation {
+      0% {
+        transform: scale(2.0);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1.0);
+        opacity: 1;
+      }
+    }
+
+    .music-player {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px solid #0080ff;
+      padding: 10px 15px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 8px;
+      color: #0080ff;
+      text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
+      background-image:
+        linear-gradient(0deg, transparent 24%, rgba(0, 128, 255, 0.05) 25%, rgba(0, 128, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 128, 255, 0.05) 75%, rgba(0, 128, 255, 0.05) 76%, transparent 77%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(0, 128, 255, 0.05) 25%, rgba(0, 128, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 128, 255, 0.05) 75%, rgba(0, 128, 255, 0.05) 76%, transparent 77%, transparent);
+      background-size: 8px 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .music-player audio {
+      width: 200px;
+      height: 20px;
+    }
+
+    .music-label {
+      white-space: nowrap;
+      line-height: 1.6;
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+
+      0%,
+      100% {
+        text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
+      }
+
+      50% {
+        text-shadow: 0 0 10px rgba(0, 128, 255, 0.8), 0 0 20px rgba(0, 128, 255, 0.4);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .music-player {
+        bottom: 80px;
+        right: 10px;
+        padding: 8px 10px;
+        font-size: 6px;
+      }
+
+      .music-player audio {
+        width: 150px;
+        height: 18px;
+      }
+    }
+
+    .show-panel-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: rgba(0, 40, 80, 0.9);
+      border: 2px solid #0080ff;
+      border-radius: 4px;
+      padding: 12px 20px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      color: #0080ff;
+      text-shadow: 0 0 5px rgba(0, 128, 255, 0.5);
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .show-panel-button:hover {
+      background: rgba(0, 80, 160, 0.9);
+      box-shadow: 0 0 20px rgba(0, 128, 255, 0.6);
+      transform: scale(1.05);
+    }
+
+    .show-panel-button:active {
+      background: rgba(0, 120, 255, 0.9);
+      box-shadow: 0 0 25px rgba(0, 128, 255, 0.8);
+    }
+
+    @media (max-width: 768px) {
+      .show-panel-button {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 7px;
+      }
+    }
+
+    .hide-panel-ribbon {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, rgba(0, 40, 80, 0.8) 0%, rgba(0, 80, 160, 0.95) 100%);
+      border-top: 2px solid #0080ff;
+      border-bottom: 2px solid #0080ff;
+      padding: 12px;
+      text-align: center;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      color: #0080ff;
+      text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
+      cursor: pointer;
+      box-shadow: 0 -4px 15px rgba(0, 128, 255, 0.3), inset 0 2px 10px rgba(0, 128, 255, 0.2);
+      transition: all 0.2s ease;
+      z-index: 1000;
+      letter-spacing: 2px;
+    }
+
+    .hide-panel-ribbon:hover {
+      background: linear-gradient(180deg, rgba(0, 60, 120, 0.9) 0%, rgba(0, 100, 200, 1) 100%);
+      text-shadow: 0 0 12px rgba(0, 128, 255, 1);
+      box-shadow: 0 -6px 20px rgba(0, 128, 255, 0.5), inset 0 2px 15px rgba(0, 128, 255, 0.4);
+    }
+
+    .hide-panel-ribbon:active {
+      background: linear-gradient(180deg, rgba(0, 80, 160, 1) 0%, rgba(0, 120, 255, 1) 100%);
+      transform: scale(0.98);
+    }
+  </style>
+  <script>
+    window.ga = window.ga || function () { (ga.q = ga.q || []).push(arguments) }; ga.l = +new Date;
+    ga('create', 'UA-105392568-1', 'auto');
+    ga('send', 'pageview');
+  </script>
+  <script async src="https://www.google-analytics.com/analytics.js"></script>
+</head>
+
+<body>
+  <video class="input_video" style="display: none;"></video>
+  <canvas></canvas>
+
+  <div class="title-overlay">
+    <h1 class="title-main">AURORA FLOW</h1>
+    <p class="instruction-text"><span class="wave-text">Just wave 👋 or pinch 🤏</span><br>&lt;in front of the
+      camera&gt;</p>
+  </div>
+
+  <div class="credits-box">
+    <p class="credits-name">by Livia Ellen</p>
+    <p class="credits-handle">@ellen_in_sf</p>
+  </div>
+
+  <div class="promo">
+    <div class="promo-middle">
+      <div class="promo-content">
+        <div class="promo-header">
+          <span class="promo-close">&times;</span>
         </div>
-
-        <div class="credits-box">
-            <p class="credits-name">by Livia Ellen</p>
-            <p class="credits-handle">@ellen_in_sf</p>
+        <div class="promo-body">
+          <p style="font-size: 1.2em; line-height: 1.6; padding: 20px;">Please open Aurora Flow in a desktop browser or
+            PC for the full hand tracking experience! 💻</p>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="promo">
-            <div class="promo-middle">
-                <div class="promo-content">
-                    <div class="promo-header">
-                        <span class="promo-close">&times;</span>
-                    </div>
-                    <div class="promo-body">
-                        <p style="font-size: 1.2em; line-height: 1.6; padding: 20px;">Please open Aurora Flow in a desktop browser or PC for the full hand tracking experience! 💻</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="music-player">
+    <span class="music-label">♪ AMBIENT</span>
+    <audio id="ambient-audio" controls loop autoplay>
+      <source src="ambient-music.mp3" type="audio/mpeg">
+    </audio>
+  </div>
 
-        <div class="music-player">
-            <span class="music-label">♪ AMBIENT</span>
-            <audio id="ambient-audio" controls loop autoplay>
-                <source src="ambient-music.mp3" type="audio/mpeg">
-            </audio>
-        </div>
+  <button id="show-panel-btn" class="show-panel-button" style="display: none;">SHOW PANEL</button>
 
-        <button id="show-panel-btn" class="show-panel-button" style="display: none;">SHOW PANEL</button>
+  <!-- Bottom Center Action Buttons -->
+  <div class="bottom-actions">
+    <button id="screenshot-btn" class="action-button screenshot-btn">
+      <span class="button-label">CAPTURE</span>
+    </button>
+    <button id="record-btn" class="action-button record-btn">
+      <span class="button-icon">●</span>
+      <span class="button-label">REC</span>
+    </button>
+  </div>
 
-        <!-- Bottom Center Action Buttons -->
-        <div class="bottom-actions">
-            <button id="screenshot-btn" class="action-button screenshot-btn">
-                <span class="button-label">CAPTURE</span>
-            </button>
-            <button id="record-btn" class="action-button record-btn">
-                <span class="button-icon">●</span>
-                <span class="button-label">REC</span>
-            </button>
-        </div>
+  <script>
+    // Set default volume to 70%
+    document.addEventListener('DOMContentLoaded', function () {
+      const audio = document.getElementById('ambient-audio');
+      if (audio) {
+        audio.volume = 0.7;
+      }
 
-        <script>
-            // Set default volume to 70%
-            document.addEventListener('DOMContentLoaded', function() {
-                const audio = document.getElementById('ambient-audio');
-                if (audio) {
-                    audio.volume = 0.7;
-                }
+      // Wire up action buttons
+      const screenshotBtn = document.getElementById('screenshot-btn');
+      const recordBtn = document.getElementById('record-btn');
 
-                // Wire up action buttons
-                const screenshotBtn = document.getElementById('screenshot-btn');
-                const recordBtn = document.getElementById('record-btn');
+      // Screenshot button handler
+      if (screenshotBtn) {
+        screenshotBtn.addEventListener('click', function () {
+          if (window.captureScreenshot) {
+            window.captureScreenshot();
+          }
+        });
+      }
 
-                // Screenshot button handler
-                if (screenshotBtn) {
-                    screenshotBtn.addEventListener('click', function() {
-                        if (window.captureScreenshot) {
-                            window.captureScreenshot();
-                        }
-                    });
-                }
+      // Record button handler
+      if (recordBtn) {
+        recordBtn.addEventListener('click', function () {
+          // Check if recording by looking at button state
+          if (recordBtn.classList.contains('recording')) {
+            if (window.stopRecording) {
+              window.stopRecording();
+            }
+          } else {
+            if (window.startRecording) {
+              window.startRecording();
+            }
+          }
+        });
+      }
+    });
+  </script>
 
-                // Record button handler
-                if (recordBtn) {
-                    recordBtn.addEventListener('click', function() {
-                        // Check if recording by looking at button state
-                        if (recordBtn.classList.contains('recording')) {
-                            if (window.stopRecording) {
-                                window.stopRecording();
-                            }
-                        } else {
-                            if (window.startRecording) {
-                                window.startRecording();
-                            }
-                        }
-                    });
-                }
-            });
-        </script>
+  <script src="./handTracking.js"></script>
+  <script src="./script.js"></script>
+</body>
 
-        <script src="./handTracking.js"></script>
-        <script src="./script.js"></script>
-    </body>
 </html>
