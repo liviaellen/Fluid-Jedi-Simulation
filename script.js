@@ -97,6 +97,11 @@ let canvasStream = null;
 let audioStream = null;
 let combinedStream = null;
 
+// Persistent Audio Context and Nodes
+let audioContext = null;
+let audioSource = null;
+let audioDestination = null;
+
 const { gl, ext } = getWebGLContext(canvas);
 
 if (isMobile()) {
@@ -504,17 +509,24 @@ function startRecording() {
             throw new Error('Audio element not found');
         }
 
-        // Create audio context and source from audio element
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioContext.createMediaElementSource(audioElement);
-        const destination = audioContext.createMediaStreamDestination();
+        // Initialize AudioContext and nodes only once
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioSource = audioContext.createMediaElementSource(audioElement);
+            audioDestination = audioContext.createMediaStreamDestination();
 
-        // Connect audio element to destination (this will be our stream)
-        source.connect(destination);
-        source.connect(audioContext.destination); // Also connect to speakers so audio continues playing
+            // Connect audio element to destination (this will be our stream)
+            audioSource.connect(audioDestination);
+            audioSource.connect(audioContext.destination); // Also connect to speakers so audio continues playing
+        }
 
-        audioStream = destination.stream;
-        console.log('Audio stream captured:', audioStream);
+        // Ensure AudioContext is active (it may be suspended by browser policy)
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+
+        audioStream = audioDestination.stream;
+        console.log('Audio stream captured (persistent):', audioStream);
 
         // Step 3: Combine canvas video track with audio track
         combinedStream = new MediaStream();
@@ -658,7 +670,9 @@ function cleanupRecording() {
     }
 
     if (audioStream) {
-        audioStream.getTracks().forEach(track => track.stop());
+        // We DON'T stop audio tracks here because they come from a persistent MediaStreamDestination
+        // if we stop them, subsequent recordings will have no audio.
+        // audioStream.getTracks().forEach(track => track.stop());
         audioStream = null;
     }
 
