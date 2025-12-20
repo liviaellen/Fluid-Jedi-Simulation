@@ -89,6 +89,14 @@ let pointers = [];
 let splatStack = [];
 pointers.push(new pointerPrototype());
 
+// Video Recording State
+let mediaRecorder = null;
+let recordedChunks = [];
+let isRecording = false;
+let canvasStream = null;
+let audioStream = null;
+let combinedStream = null;
+
 const { gl, ext } = getWebGLContext(canvas);
 
 if (isMobile()) {
@@ -367,11 +375,10 @@ function startGUI () {
     advancedFolder.add(config, 'PRESSURE', 0.0, 1.0).name('pressure');
     advancedFolder.add(config, 'CURL', 0, 50).name('vorticity').step(1);
 
-    // Capture
-    let captureFolder = gui.addFolder('Capture');
-    captureFolder.addColor(config, 'BACK_COLOR').name('background color');
+    // Background
+    let captureFolder = gui.addFolder('Background');
+    captureFolder.addColor(config, 'BACK_COLOR').name('BG color');
     captureFolder.add(config, 'TRANSPARENT').name('transparent');
-    captureFolder.add({ fun: captureScreenshot }, 'fun').name('take screenshot');
 
     // Social Links
     let github = gui.add({ fun : () => {
@@ -471,6 +478,222 @@ function downloadURI (filename, uri) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+}
+
+/**
+ * Start video recording - captures canvas + audio
+ */
+function startRecording() {
+    try {
+        // Prevent multiple recordings
+        if (isRecording) {
+            console.warn('Recording already in progress');
+            return;
+        }
+
+        // Reset recorded chunks
+        recordedChunks = [];
+
+        // Step 1: Capture canvas stream at 60fps
+        canvasStream = canvas.captureStream(60);
+        console.log('Canvas stream captured:', canvasStream);
+
+        // Step 2: Capture audio from the audio element
+        const audioElement = document.getElementById('ambient-audio');
+        if (!audioElement) {
+            throw new Error('Audio element not found');
+        }
+
+        // Create audio context and source from audio element
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaElementSource(audioElement);
+        const destination = audioContext.createMediaStreamDestination();
+
+        // Connect audio element to destination (this will be our stream)
+        source.connect(destination);
+        source.connect(audioContext.destination); // Also connect to speakers so audio continues playing
+
+        audioStream = destination.stream;
+        console.log('Audio stream captured:', audioStream);
+
+        // Step 3: Combine canvas video track with audio track
+        combinedStream = new MediaStream();
+
+        // Add video track from canvas
+        const videoTrack = canvasStream.getVideoTracks()[0];
+        if (videoTrack) {
+            combinedStream.addTrack(videoTrack);
+            console.log('Video track added');
+        } else {
+            throw new Error('No video track available from canvas');
+        }
+
+        // Add audio track
+        const audioTrack = audioStream.getAudioTracks()[0];
+        if (audioTrack) {
+            combinedStream.addTrack(audioTrack);
+            console.log('Audio track added');
+        } else {
+            console.warn('No audio track available - recording video only');
+        }
+
+        // Step 4: Determine supported MIME type
+        let mimeType = 'video/webm;codecs=vp9,opus';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = 'video/webm;codecs=vp8,opus';
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                mimeType = 'video/webm';
+                console.warn('Using fallback MIME type:', mimeType);
+            }
+        }
+        console.log('Using MIME type:', mimeType);
+
+        // Step 5: Create MediaRecorder with optimal settings
+        const options = {
+            mimeType: mimeType,
+            videoBitsPerSecond: 5000000 // 5 Mbps for high quality
+        };
+
+        mediaRecorder = new MediaRecorder(combinedStream, options);
+
+        // Handle data available event
+        mediaRecorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+                recordedChunks.push(event.data);
+                console.log('Chunk recorded:', event.data.size, 'bytes');
+            }
+        };
+
+        // Handle recording stop event
+        mediaRecorder.onstop = () => {
+            console.log('Recording stopped, total chunks:', recordedChunks.length);
+            downloadRecording();
+            cleanupRecording();
+        };
+
+        // Handle errors
+        mediaRecorder.onerror = (event) => {
+            console.error('MediaRecorder error:', event.error);
+            alert('Recording error: ' + event.error.message);
+            cleanupRecording();
+        };
+
+        // Start recording (request data every 100ms for smoother playback)
+        mediaRecorder.start(100);
+        isRecording = true;
+
+        console.log('Recording started successfully');
+        ga('send', 'event', 'recording', 'start');
+
+        // Update button state
+        updateRecordButtonState();
+
+    } catch (error) {
+        console.error('Failed to start recording:', error);
+        alert('Failed to start recording: ' + error.message);
+        cleanupRecording();
+    }
+}
+
+/**
+ * Stop video recording
+ */
+function stopRecording() {
+    if (!isRecording || !mediaRecorder) {
+        console.warn('No recording in progress');
+        return;
+    }
+
+    console.log('Stopping recording...');
+    mediaRecorder.stop();
+    isRecording = false;
+
+    ga('send', 'event', 'recording', 'stop');
+
+    // Update button state
+    updateRecordButtonState();
+}
+
+/**
+ * Download the recorded video
+ */
+function downloadRecording() {
+    if (recordedChunks.length === 0) {
+        console.warn('No recorded data to download');
+        return;
+    }
+
+    // Create blob from recorded chunks
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    console.log('Created blob:', blob.size, 'bytes');
+
+    // Create download URL
+    const url = URL.createObjectURL(blob);
+
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const filename = `aurora-flow-${timestamp}.webm`;
+
+    // Trigger download
+    downloadURI(filename, url);
+
+    console.log('Download triggered:', filename);
+    ga('send', 'event', 'recording', 'download', filename);
+
+    // Clean up URL after a delay (browser needs time to start download)
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+        console.log('Blob URL revoked');
+    }, 1000);
+}
+
+/**
+ * Clean up recording resources
+ */
+function cleanupRecording() {
+    // Stop all tracks
+    if (canvasStream) {
+        canvasStream.getTracks().forEach(track => track.stop());
+        canvasStream = null;
+    }
+
+    if (audioStream) {
+        audioStream.getTracks().forEach(track => track.stop());
+        audioStream = null;
+    }
+
+    if (combinedStream) {
+        combinedStream.getTracks().forEach(track => track.stop());
+        combinedStream = null;
+    }
+
+    // Clear references
+    mediaRecorder = null;
+    recordedChunks = [];
+    isRecording = false;
+
+    console.log('Recording resources cleaned up');
+}
+
+/**
+ * Update record button visual state
+ */
+function updateRecordButtonState() {
+    const recordBtn = document.getElementById('record-btn');
+    if (recordBtn) {
+        const labelElement = recordBtn.querySelector('.button-label');
+        if (isRecording) {
+            recordBtn.classList.add('recording');
+            if (labelElement) {
+                labelElement.textContent = 'STOP';
+            }
+        } else {
+            recordBtn.classList.remove('recording');
+            if (labelElement) {
+                labelElement.textContent = 'REC';
+            }
+        }
+    }
 }
 
 class Material {

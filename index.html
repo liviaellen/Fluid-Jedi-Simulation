@@ -338,6 +338,138 @@
                 background-color: rgba(0, 40, 80, 0.8);
             }
 
+            /* Video Recording Button Styles */
+            .dg .cr.function.record-button {
+                background: rgba(40, 0, 80, 0.6) !important;
+                border: 2px solid #ff1493 !important;
+                box-shadow: 0 0 10px rgba(255, 20, 147, 0.3) !important;
+            }
+
+            .dg .cr.function.record-button:hover {
+                background: rgba(80, 0, 160, 0.8) !important;
+                box-shadow: 0 0 15px rgba(255, 20, 147, 0.6) !important;
+            }
+
+            .dg .cr.function.record-button.active {
+                background: rgba(255, 20, 147, 0.9) !important;
+                box-shadow: 0 0 20px rgba(255, 20, 147, 0.8), inset 0 0 15px rgba(255, 20, 147, 0.5) !important;
+                border-color: #ff1493 !important;
+                animation: recording-pulse 1.5s ease-in-out infinite !important;
+            }
+
+            .dg .cr.function.record-button.active .property-name {
+                color: #ffffff !important;
+                text-shadow: 0 0 10px rgba(255, 20, 147, 1) !important;
+            }
+
+            @keyframes recording-pulse {
+                0%, 100% {
+                    box-shadow: 0 0 20px rgba(255, 20, 147, 0.8), inset 0 0 15px rgba(255, 20, 147, 0.5);
+                }
+                50% {
+                    box-shadow: 0 0 30px rgba(255, 20, 147, 1), inset 0 0 20px rgba(255, 20, 147, 0.7);
+                }
+            }
+
+            /* Bottom Center Action Buttons */
+            .bottom-actions {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 20px;
+                z-index: 100;
+            }
+
+            .action-button {
+                font-family: 'Press Start 2P', monospace;
+                font-size: 12px;
+                padding: 15px 25px;
+                background: rgba(0, 40, 80, 0.85);
+                border: 2px solid #0080ff;
+                border-radius: 8px;
+                color: #0080ff;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                transition: all 0.3s ease;
+                box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
+                text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
+            }
+
+            .action-button:hover {
+                background: rgba(0, 80, 160, 0.9);
+                box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
+                transform: translateY(-2px);
+            }
+
+            .action-button .button-icon {
+                font-size: 16px;
+            }
+
+            .action-button .button-label {
+                font-size: 11px;
+            }
+
+            /* Screenshot Button */
+            .screenshot-btn {
+                border-color: #0080ff;
+                color: #0080ff;
+                box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
+                text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
+            }
+
+            .screenshot-btn:hover {
+                background: rgba(0, 80, 160, 0.9);
+                box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
+            }
+
+            /* Record Button */
+            .record-btn {
+                border-color: #0080ff;
+                color: #0080ff;
+                box-shadow: 0 0 15px rgba(0, 128, 255, 0.3);
+                text-shadow: 0 0 8px rgba(0, 128, 255, 0.8);
+            }
+
+            .record-btn:hover {
+                background: rgba(0, 80, 160, 0.9);
+                box-shadow: 0 0 25px rgba(0, 128, 255, 0.6);
+            }
+
+            .record-btn.recording {
+                background: rgba(255, 20, 147, 0.9);
+                animation: recording-pulse 1.5s ease-in-out infinite;
+                color: #ffffff;
+            }
+
+            .record-btn.recording .button-label {
+                content: 'STOP';
+            }
+
+            /* Mobile responsive */
+            @media (max-width: 600px) {
+                .bottom-actions {
+                    bottom: 15px;
+                    gap: 10px;
+                }
+
+                .action-button {
+                    font-size: 10px;
+                    padding: 12px 20px;
+                }
+
+                .action-button .button-icon {
+                    font-size: 14px;
+                }
+
+                .action-button .button-label {
+                    font-size: 9px;
+                }
+            }
+
             .cr.function.appBigFont .property-name {
                 float: none;
             }
@@ -623,12 +755,52 @@
 
         <button id="show-panel-btn" class="show-panel-button" style="display: none;">SHOW PANEL</button>
 
+        <!-- Bottom Center Action Buttons -->
+        <div class="bottom-actions">
+            <button id="screenshot-btn" class="action-button screenshot-btn">
+                <span class="button-label">CAPTURE</span>
+            </button>
+            <button id="record-btn" class="action-button record-btn">
+                <span class="button-icon">●</span>
+                <span class="button-label">REC</span>
+            </button>
+        </div>
+
         <script>
             // Set default volume to 70%
             document.addEventListener('DOMContentLoaded', function() {
                 const audio = document.getElementById('ambient-audio');
                 if (audio) {
                     audio.volume = 0.7;
+                }
+
+                // Wire up action buttons
+                const screenshotBtn = document.getElementById('screenshot-btn');
+                const recordBtn = document.getElementById('record-btn');
+
+                // Screenshot button handler
+                if (screenshotBtn) {
+                    screenshotBtn.addEventListener('click', function() {
+                        if (window.captureScreenshot) {
+                            window.captureScreenshot();
+                        }
+                    });
+                }
+
+                // Record button handler
+                if (recordBtn) {
+                    recordBtn.addEventListener('click', function() {
+                        // Check if recording by looking at button state
+                        if (recordBtn.classList.contains('recording')) {
+                            if (window.stopRecording) {
+                                window.stopRecording();
+                            }
+                        } else {
+                            if (window.startRecording) {
+                                window.startRecording();
+                            }
+                        }
+                    });
                 }
             });
         </script>
