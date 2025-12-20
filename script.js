@@ -278,7 +278,7 @@ function startGUI() {
   let soulsBtn = gui.add(presets, 'Souls').name('SOULS');
   soulsBtn.__li.classList.add('preset-button', 'souls');
 
-  let auroraBtn = gui.add(presets, 'Aurora').name('AURORA');
+  let auroraBtn = gui.add(presets, 'Aurora').name('PILGRIM');
   auroraBtn.__li.classList.add('preset-button', 'aurora');
 
   let abyssBtn = gui.add(presets, 'Abyss').name('ABYSS');
@@ -529,9 +529,8 @@ function captureScreenshot() {
   texture = normalizeTexture(texture, target.width, target.height);
 
   let captureCanvas = textureToCanvas(texture, target.width, target.height);
-  let datauri = captureCanvas.toDataURL();
+  let datauri = captureCanvas.toDataURL('image/png');
   downloadURI('fluid.png', datauri);
-  URL.revokeObjectURL(datauri);
 }
 
 function framebufferToTexture(target) {
@@ -563,34 +562,64 @@ function clamp01(input) {
 }
 
 function drawWatermark(ctx, width, height) {
-  const fontSize = Math.max(12, Math.floor(width / 40));
-  ctx.font = `${fontSize}px Inter, sans-serif`;
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'bottom';
+  const isSmall = width < 600;
+  const padding = isSmall ? 10 : 20;
+  const boxPaddingX = isSmall ? 10 : 16;
+  const boxPaddingY = isSmall ? 8 : 12;
+  const fontSizeMain = isSmall ? 8 : 10;
+  const fontSizeSub = isSmall ? 6 : 8;
 
-  const text = 'by Livia Ellen @ellen_in_sf';
-  const padding = 20;
+  // Use pixel font if available, else fallback
+  const fontMain = `${fontSizeMain}px "Press Start 2P", cursive, monospace`;
+  const fontSub = `${fontSizeSub}px "Press Start 2P", cursive, monospace`;
 
-  // Shadow for readability
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
+  const text1 = 'by Livia Ellen';
+  const text2 = '@ellen_in_sf';
 
-  // Semi-transparent background for extreme cases
-  const metrics = ctx.measureText(text);
-  const textWidth = metrics.width;
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-  ctx.fillRect(width - textWidth - padding - 5, height - fontSize - padding - 5, textWidth + 10, fontSize + 10);
+  ctx.font = fontMain;
+  const metrics1 = ctx.measureText(text1);
+  ctx.font = fontSub;
+  const metrics2 = ctx.measureText(text2);
 
-  ctx.fillStyle = 'white';
-  ctx.fillText(text, width - padding, height - padding);
+  const boxWidth = Math.max(metrics1.width, metrics2.width) + boxPaddingX * 2;
+  const boxHeight = fontSizeMain + fontSizeSub + boxPaddingY * 2 + 6;
+
+  const x = padding;
+  const y = height - padding - boxHeight;
+
+  // Draw Background Box (Same as .credits-box)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+  ctx.fillRect(x, y, boxWidth, boxHeight);
+
+  // Draw Blue Border
+  ctx.strokeStyle = '#0080ff';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, boxWidth, boxHeight);
+
+  // Optional: Draw scanline/grid effect inside box?
+  // For simplicity, let's keep it clean but matching the border.
+
+  // Draw Text
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+
+  // Line 1: Name
+  ctx.font = fontMain;
+  ctx.fillStyle = '#0080ff';
+  ctx.shadowColor = 'rgba(0, 128, 255, 0.5)';
+  ctx.shadowBlur = 5;
+  ctx.fillText(text1, x + boxPaddingX, y + boxPaddingY);
+
+  // Line 2: Handle
+  ctx.font = fontSub;
+  ctx.fillStyle = '#0066cc';
+  ctx.shadowColor = 'rgba(0, 128, 255, 0.3)';
+  ctx.shadowBlur = 3;
+  ctx.fillText(text2, x + boxPaddingX, y + boxPaddingY + fontSizeMain + 6);
 
   // Reset shadow
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
 }
 
 function textureToCanvas(texture, width, height) {
